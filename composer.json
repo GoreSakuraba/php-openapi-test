@@ -8,7 +8,7 @@
     "byjg/webrequest": "^2.0.2",
     "php": ">=7.3",
     "ext-json": "*",
-    "guzzlehttp/psr7": "^1.8"
+    "guzzlehttp/psr7": "^2.4"
   },
   "require-dev": {
     "byjg/restserver": "4.0.*",
