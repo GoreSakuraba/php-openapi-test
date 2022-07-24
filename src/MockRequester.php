@@ -3,10 +3,8 @@
 
 namespace ByJG\ApiTools;
 
-use ByJG\Util\CurlException;
+use ByJG\Util\Exception\CurlException;
 use ByJG\Util\MockClient;
-use ByJG\Util\Psr7\MessageException;
-use ByJG\Util\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -17,10 +15,9 @@ class MockRequester extends AbstractRequester
 
     /**
      * MockAbstractRequest constructor.
-     * @param Response $expectedResponse
-     * @throws MessageException
+     * @param ResponseInterface $expectedResponse
      */
-    public function __construct(Response $expectedResponse)
+    public function __construct(ResponseInterface $expectedResponse)
     {
         $this->httpClient = new MockClient($expectedResponse);
         parent::__construct();
@@ -28,9 +25,9 @@ class MockRequester extends AbstractRequester
 
     /**
      * @param RequestInterface $request
-     * @return Response|ResponseInterface
+     *
+     * @return ResponseInterface
      * @throws CurlException
-     * @throws MessageException
      */
     protected function handleRequest(RequestInterface $request)
     {

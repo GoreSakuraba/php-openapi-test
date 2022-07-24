@@ -8,7 +8,7 @@ use ByJG\ApiTools\Exception\HttpMethodNotFoundException;
 use ByJG\ApiTools\Exception\InvalidDefinitionException;
 use ByJG\ApiTools\Exception\NotMatchedException;
 use ByJG\ApiTools\Exception\PathNotFoundException;
-use ByJG\Util\Uri;
+use GuzzleHttp\Psr7\Uri;
 use InvalidArgumentException;
 
 class OpenApiSchema extends Schema

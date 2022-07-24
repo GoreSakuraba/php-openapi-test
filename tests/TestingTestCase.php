@@ -5,11 +5,10 @@ namespace Test;
 use ByJG\ApiTools\ApiRequester;
 use ByJG\ApiTools\ApiTestCase;
 use ByJG\ApiTools\MockRequester;
-use ByJG\Util\Helper\RequestMultiPart;
-use ByJG\Util\MultiPartItem;
-use ByJG\Util\Psr7\Request;
-use ByJG\Util\Psr7\Response;
-use ByJG\Util\Uri;
+use GuzzleHttp\Psr7\MultipartStream;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Utils;
 
 /**
  * Class TestingTestCase
@@ -55,9 +54,7 @@ abstract class TestingTestCase extends ApiTestCase
 
 
         // PSR7 Request
-        $psr7Request = Request::getInstance(new Uri("/pet"))
-            ->withMethod("post")
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode($body)));
+        $psr7Request = new Request('post', '/pet', [], Utils::streamFor(json_encode($body)));
 
         $expectedResponse = new Response();
         $request = new MockRequester($expectedResponse);
@@ -125,13 +122,29 @@ abstract class TestingTestCase extends ApiTestCase
         $this->assertRequest($request);
     }
 
+    /**
+     * @return void
+     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
+     * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
+     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
+     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
+     * @throws \ByJG\ApiTools\Exception\NotMatchedException
+     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
+     */
     public function testMultipart()
     {
-        $multipart = [
-            new MultiPartItem("note", "somenote"),
-            new MultiPartItem("upfile", file_get_contents(__DIR__ . "/smile.png"), "smile", "image/png")
-        ];
-        $psr7Requester = RequestMultiPart::build(new Uri("/inventory"), "post", $multipart);
+        $psr7Requester = new Request('post', '/inventory', ['Content-Type' => 'multipart/form-data'], new MultipartStream([
+            [
+                'name'     => 'note',
+                'contents' => 'somenote'
+            ],
+            [
+                'name'     => 'upfile',
+                'contents' => Utils::tryFopen(__DIR__ . '/smile.png', 'rb'),
+            ],
+        ]));
 
         $request = new ApiRequester();
         $request
@@ -142,5 +155,4 @@ abstract class TestingTestCase extends ApiTestCase
 
         $this->assertRequest($request);
     }
-
 }

@@ -4,20 +4,19 @@ namespace Test;
 
 use ByJG\ApiTools\ApiTestCase;
 use ByJG\ApiTools\MockRequester;
-use ByJG\Util\Psr7\Request;
-use ByJG\Util\Psr7\Response;
-use ByJG\Util\Uri;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Utils;
 
 abstract class AbstractRequesterTest extends ApiTestCase
 {
     public function testExpectOK()
     {
-        $expectedResponse = Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
-                "id" => 1,
-                "name" => "Spike",
-                "photoUrls" => []
-            ])));
+        $expectedResponse = new Response(200, [], Utils::streamFor(json_encode([
+            "id" => 1,
+            "name" => "Spike",
+            "photoUrls" => []
+        ])));
 
         // Basic Request
         $request = new MockRequester($expectedResponse);
@@ -28,8 +27,7 @@ abstract class AbstractRequesterTest extends ApiTestCase
         $this->assertRequest($request);
 
         // PSR7 Request
-        $psr7Request = Request::getInstance(new Uri("/pet/1"))
-            ->withMethod("get");
+        $psr7Request = new Request('get', '/pet/1');
 
         $request = new MockRequester($expectedResponse);
         $request->withPsr7Request($psr7Request);
@@ -42,21 +40,20 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testExpectError()
     {
         $this->expectException(\ByJG\ApiTools\Exception\NotMatchedException::class);
         $this->expectExceptionMessage('Required property \'name\'');
 
-        $expectedResponse = Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
-                "id" => 1,
-                "photoUrls" => []
-            ])));
+        $expectedResponse = new Response(200, [], Utils::streamFor(json_encode([
+            "id" => 1,
+            "photoUrls" => []
+        ])));
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -71,19 +68,18 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertResponse()
     {
-        $expectedResponse = Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
-                "id" => 1,
-                "name" => "Spike",
-                "photoUrls" => []
-            ])));
+        $expectedResponse = new Response(200, [], Utils::streamFor(json_encode([
+            "id" => 1,
+            "name" => "Spike",
+            "photoUrls" => []
+        ])));
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -99,14 +95,14 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertResponse404()
     {
-        $expectedResponse = Response::getInstance(404);
+        $expectedResponse = new Response(404);
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -122,18 +118,17 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertResponse404WithContent()
     {
         $this->expectException(\ByJG\ApiTools\Exception\NotMatchedException::class);
         $this->expectExceptionMessage('Expected empty body for GET 404 /v2/pet/1');
 
-        $expectedResponse = Response::getInstance(404)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor('{"error":"not found"}'));
+        $expectedResponse = new Response(404, [], Utils::streamFor('{"error":"not found"}'));
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -149,17 +144,17 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertResponseNotExpected()
     {
         $this->expectException(\ByJG\ApiTools\Exception\StatusCodeNotMatchedException::class);
         $this->expectExceptionMessage('Status code not matched: Expected 404, got 522');
 
-        $expectedResponse = Response::getInstance(522);
+        $expectedResponse = new Response(522);
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -175,20 +170,18 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertHeaderContains()
     {
-        $expectedResponse = Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
-                "id" => 1,
-                "name" => "Spike",
-                "photoUrls" => []
-            ])))
-            ->withHeader("X-Test", "Some Value to test");
+        $expectedResponse = new Response(200, ['X-Test' => 'Some Value to test'], Utils::streamFor(json_encode([
+            "id" => 1,
+            "name" => "Spike",
+            "photoUrls" => []
+        ])));
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -205,23 +198,21 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertHeaderContainsWrongValue()
     {
         $this->expectException(\ByJG\ApiTools\Exception\NotMatchedException::class);
         $this->expectExceptionMessage('Does not exists header \'X-Test\' with value \'Different\'');
 
-        $expectedResponse = Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
-                "id" => 1,
-                "name" => "Spike",
-                "photoUrls" => []
-            ])))
-            ->withHeader("X-Test", "Some Value to test");
+        $expectedResponse = new Response(200, ['X-Test' => 'Some Value to test'], Utils::streamFor(json_encode([
+            "id" => 1,
+            "name" => "Spike",
+            "photoUrls" => []
+        ])));
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -238,22 +229,21 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertHeaderContainsNonExistent()
     {
         $this->expectException(\ByJG\ApiTools\Exception\NotMatchedException::class);
         $this->expectExceptionMessage('Does not exists header \'X-Test\' with value \'Different\'');
 
-        $expectedResponse = Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
-                "id" => 1,
-                "name" => "Spike",
-                "photoUrls" => []
-            ])));
+        $expectedResponse = new Response(200, [], Utils::streamFor(json_encode([
+            "id" => 1,
+            "name" => "Spike",
+            "photoUrls" => []
+        ])));
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -270,19 +260,18 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertBodyContains()
     {
-        $expectedResponse = Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
-                "id" => 1,
-                "name" => "Spike",
-                "photoUrls" => []
-            ])));
+        $expectedResponse = new Response(200, [], Utils::streamFor(json_encode([
+            "id" => 1,
+            "name" => "Spike",
+            "photoUrls" => []
+        ])));
 
         $request = new MockRequester($expectedResponse);
         $request
@@ -299,22 +288,21 @@ abstract class AbstractRequesterTest extends ApiTestCase
      * @throws \ByJG\ApiTools\Exception\GenericSwaggerException
      * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
      * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @throws \ByJG\ApiTools\Exception\InvalidRequestException
      * @throws \ByJG\ApiTools\Exception\NotMatchedException
      * @throws \ByJG\ApiTools\Exception\PathNotFoundException
      * @throws \ByJG\ApiTools\Exception\StatusCodeNotMatchedException
-     * @throws \ByJG\Util\Psr7\MessageException
      */
     public function testValidateAssertBodyNotContains()
     {
         $this->expectException(\ByJG\ApiTools\Exception\NotMatchedException::class);
         $this->expectExceptionMessage('Body does not contain \'Doris\'');
 
-        $expectedResponse = Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
-                "id" => 1,
-                "name" => "Spike",
-                "photoUrls" => []
-            ])));
+        $expectedResponse = new Response(200, [], Utils::streamFor(json_encode([
+            "id" => 1,
+            "name" => "Spike",
+            "photoUrls" => []
+        ])));
 
         $request = new MockRequester($expectedResponse);
         $request

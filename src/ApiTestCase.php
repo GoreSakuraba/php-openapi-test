@@ -10,9 +10,8 @@ use ByJG\ApiTools\Exception\InvalidDefinitionException;
 use ByJG\ApiTools\Exception\NotMatchedException;
 use ByJG\ApiTools\Exception\PathNotFoundException;
 use ByJG\ApiTools\Exception\StatusCodeNotMatchedException;
-use ByJG\Util\Psr7\MessageException;
-use ByJG\Util\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
 
 abstract class ApiTestCase extends TestCase
 {
@@ -55,12 +54,13 @@ abstract class ApiTestCase extends TestCase
     }
 
     /**
-     * @param string $method The HTTP Method: GET, PUT, DELETE, POST, etc
-     * @param string $path The REST path call
-     * @param int $statusExpected
+     * @param string     $method The HTTP Method: GET, PUT, DELETE, POST, etc
+     * @param string     $path   The REST path call
+     * @param int        $statusExpected
      * @param array|null $query
      * @param array|null $requestBody
-     * @param array $requestHeader
+     * @param array      $requestHeader
+     *
      * @return mixed
      * @throws DefinitionNotFoundException
      * @throws GenericSwaggerException
@@ -69,7 +69,7 @@ abstract class ApiTestCase extends TestCase
      * @throws NotMatchedException
      * @throws PathNotFoundException
      * @throws StatusCodeNotMatchedException
-     * @throws MessageException
+     * @throws Exception\InvalidRequestException
      * @deprecated Use assertRequest instead
      */
     protected function makeRequest(
@@ -102,7 +102,8 @@ abstract class ApiTestCase extends TestCase
 
     /**
      * @param AbstractRequester $request
-     * @return Response
+     *
+     * @return ResponseInterface
      * @throws DefinitionNotFoundException
      * @throws GenericSwaggerException
      * @throws HttpMethodNotFoundException
@@ -110,7 +111,7 @@ abstract class ApiTestCase extends TestCase
      * @throws NotMatchedException
      * @throws PathNotFoundException
      * @throws StatusCodeNotMatchedException
-     * @throws MessageException
+     * @throws Exception\InvalidRequestException
      */
     public function assertRequest(AbstractRequester $request)
     {

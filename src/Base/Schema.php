@@ -10,7 +10,7 @@ use ByJG\ApiTools\Exception\NotMatchedException;
 use ByJG\ApiTools\Exception\PathNotFoundException;
 use ByJG\ApiTools\OpenApi\OpenApiSchema;
 use ByJG\ApiTools\Swagger\SwaggerSchema;
-use ByJG\Util\Uri;
+use GuzzleHttp\Psr7\Uri;
 use InvalidArgumentException;
 
 abstract class Schema

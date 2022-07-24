@@ -210,12 +210,15 @@ class MyTest extends ApiTestCase
 {
     public function testExpectOK()
     {
-        $expectedResponse = \ByJG\Util\Psr7\Response::getInstance(200)
-            ->withBody(\GuzzleHttp\Psr7\Utils::streamFor(json_encode([
+        $expectedResponse = new \GuzzleHttp\Psr7\Response(
+            200,
+            [],
+            \GuzzleHttp\Psr7\Utils::streamFor(json_encode([
                 "id" => 1,
                 "name" => "Spike",
                 "photoUrls" => []
-            ])));
+            ]))
+        );
 
         // The MockRequester does not send the request to a real endpoint
         // Just returning the expected Response object sent in the constructor 
@@ -233,14 +236,17 @@ class MyTest extends ApiTestCase
 
 You can populate the `ApiRequester`/`MockRequester` with the information provided by the `RequestInterface` PSR7 interface.
 
-e.g.  
+e.g.
 
 ```php
 <?php
 
-$psr7Request = \ByJG\Util\Psr7\Request::getInstance(new Uri("/method_to_be_tested?param1=value1"))
-    ->withMethod("GET")
-    ->withBody('{"foo":"bar"}');
+$psr7Request = new \GuzzleHttp\Psr7\Request(
+    'get',
+    '/method_to_be_tested?param1=value1',
+    [],
+    \GuzzleHttp\Psr7\Utils::streamFor('{"foo":"bar"}')
+);
 
 $request = new \ByJG\ApiTools\ApiRequester();
 $request->withPsr7Request($psr7Request);

@@ -6,10 +6,8 @@ use ByJG\ApiTools\Base\Schema;
 use ByJG\ApiTools\Exception\InvalidRequestException;
 use ByJG\ApiTools\Exception\NotMatchedException;
 use ByJG\ApiTools\Exception\StatusCodeNotMatchedException;
-use ByJG\Util\Psr7\MessageException;
-use ByJG\Util\Psr7\Request;
-use ByJG\Util\Psr7\Response;
-use ByJG\Util\Uri;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -41,11 +39,10 @@ abstract class AbstractRequester
 
     /**
      * AbstractRequester constructor.
-     * @throws MessageException
      */
     public function __construct()
     {
-        $this->withPsr7Request(Request::getInstance(new Uri("/"))->withMethod("get"));
+        $this->withPsr7Request(new Request('get', '/'));
     }
 
     /**
@@ -81,7 +78,6 @@ abstract class AbstractRequester
     /**
      * @param string $method
      * @return $this
-     * @throws MessageException
      */
     public function withMethod($method)
     {
@@ -182,7 +178,7 @@ abstract class AbstractRequester
     }
 
     /**
-     * @return Response|ResponseInterface
+     * @return ResponseInterface
      * @throws Exception\DefinitionNotFoundException
      * @throws Exception\GenericSwaggerException
      * @throws Exception\HttpMethodNotFoundException
@@ -190,7 +186,6 @@ abstract class AbstractRequester
      * @throws Exception\PathNotFoundException
      * @throws NotMatchedException
      * @throws StatusCodeNotMatchedException
-     * @throws MessageException
      * @throws InvalidRequestException
      */
     public function send()
@@ -279,6 +274,12 @@ abstract class AbstractRequester
         return $response;
     }
 
+    /**
+     * @param $contentType
+     * @param $body
+     *
+     * @return array|null
+     */
     protected function parseMultiPartForm($contentType, $body)
     {
         $matchRequest = [];
@@ -289,24 +290,23 @@ abstract class AbstractRequester
 
         $matches = [];
 
-        preg_match('/boundary=(.*)$/', $contentType, $matches);
+        preg_match('/^--(.*)/', $body, $matches);
         $boundary = $matches[1];
 
         // split content by boundary and get rid of last -- element
-        $blocks = preg_split("/-+$boundary/", $body);
-        array_pop($blocks);
+        $blocks = preg_split("/-+$boundary/", rtrim($body, "--$boundary--\n"), -1, PREG_SPLIT_NO_EMPTY);
 
         // loop data blocks
-        foreach ($blocks as $id => $block) {
-            if (empty($block))
-                continue;
+        foreach ($blocks as $block) {
+            $block = trim($block);
 
-            if (strpos($block, 'application/octet-stream') !== false) {
-                preg_match("/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s", $block, $matches);
-            } else {
-                preg_match('/\bname=\"([^\"]*)\"\s*;.*?[\n|\r]+([^\n\r].*)?[\r|\n]$/s', $block, $matches);
-            }
-            $matchRequest[$matches[1]] = $matches[2];
+            preg_match('/\bname=\"([^\"]*)\"/', $block, $matches);
+            $name = $matches[1];
+
+            $matches = [];
+            preg_match('/^\s*$/m', $block, $matches, PREG_OFFSET_CAPTURE);
+
+            $matchRequest[$name] = trim(substr($block, $matches[0][1]));
         }
 
         return $matchRequest;

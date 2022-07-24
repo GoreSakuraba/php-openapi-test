@@ -5,8 +5,8 @@
   "prefer-stable": true,
   "license": "MIT",
   "require": {
-    "byjg/webrequest": "^2.0.2",
     "php": ">=7.3",
+    "ext-curl": "*",
     "ext-json": "*",
     "guzzlehttp/psr7": "^2.4"
   },
@@ -16,7 +16,8 @@
   },
   "autoload": {
     "psr-4": {
-      "ByJG\\ApiTools\\": "src/"
+      "ByJG\\ApiTools\\": "src/",
+      "ByJG\\Util\\": "thirdparty/ByJG/Util"
     }
   },
   "autoload-dev": {
