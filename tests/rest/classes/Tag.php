@@ -1,8 +1,8 @@
 <?php
 
-namespace RestTest;
+namespace Test\Rest\Classes;
 
-class Tag
+class Tag implements \JsonSerializable
 {
     protected $id;
     protected $name;
@@ -50,4 +50,14 @@ class Tag
         $this->name = $name;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+        ];
+    }
 }

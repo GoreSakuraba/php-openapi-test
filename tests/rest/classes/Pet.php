@@ -1,8 +1,8 @@
 <?php
 
-namespace RestTest;
+namespace Test\Rest\Classes;
 
-class Pet
+class Pet implements \JsonSerializable
 {
     protected $id;
     protected $category;
@@ -125,5 +125,20 @@ class Pet
     public function setStatus($status)
     {
         $this->status = $status;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'category' => $this->getCategory(),
+            'name' => $this->getName(),
+            'photoUrls' => $this->getPhotoUrls(),
+            'tags' => $this->getTags(),
+            'status' => $this->getStatus(),
+        ];
     }
 }

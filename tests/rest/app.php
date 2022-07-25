@@ -1,24 +1,35 @@
 <?php
-namespace RestTest;
 
-use ByJG\RestServer\HttpRequestHandler;
-use ByJG\RestServer\Route\OpenApiRouteDefinition;
-use Exception;
+namespace Test\Rest;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Factory\AppFactory;
+use Slim\Routing\RouteCollectorProxy;
+use Test\Rest\Classes\Handler;
+
+require dirname(__DIR__, 2) . '/vendor/autoload.php';
 require_once __DIR__ . '/classes/Handler.php';
 require_once __DIR__ . '/classes/Pet.php';
 require_once __DIR__ . '/classes/Category.php';
 require_once __DIR__ . '/classes/Tag.php';
 
-$specification = __DIR__ . '/' . getenv('SPEC') .  '.json';
+$handler = new Handler();
 
-if (!file_exists($specification)) {
-    throw new Exception("file $specification does not exists. Are you set the environment SPEC=openapi ?");
-}
+$app = AppFactory::create();
 
-$routeDefinition = new OpenApiRouteDefinition($specification);
+$app->group('/v2', function (RouteCollectorProxy $group) use ($handler): void {
+    $group->post('/pet', function (ServerRequestInterface $request, ResponseInterface $response, array $args) use ($handler): ResponseInterface {
+        return $handler->addPet($request, $response, $args);
+    });
 
-$restServer = new HttpRequestHandler();
-$restServer->handle($routeDefinition);
+    $group->get('/pet/{id}', function (ServerRequestInterface $request, ResponseInterface $response, array $args) use ($handler): ResponseInterface {
+        return $handler->getPetById($request, $response, $args);
+    });
 
+    $group->post('/inventory', function (ServerRequestInterface $request, ResponseInterface $response, $args) use ($handler): ResponseInterface {
+        return $handler->processUpload($request, $response, $args);
+    });
+});
+
+$app->run();

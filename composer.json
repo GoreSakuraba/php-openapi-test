@@ -11,7 +11,7 @@
     "guzzlehttp/psr7": "^2.4"
   },
   "require-dev": {
-    "byjg/restserver": "4.0.*",
+    "slim/slim": "^4.10",
     "phpunit/phpunit": "^9.5"
   },
   "autoload": {
