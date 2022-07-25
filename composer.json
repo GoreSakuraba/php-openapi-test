@@ -6,8 +6,8 @@
   "license": "MIT",
   "require": {
     "php": ">=7.3",
-    "ext-curl": "*",
     "ext-json": "*",
+    "guzzlehttp/guzzle": "^7.4",
     "guzzlehttp/psr7": "^2.4"
   },
   "require-dev": {
@@ -16,8 +16,7 @@
   },
   "autoload": {
     "psr-4": {
-      "ByJG\\ApiTools\\": "src/",
-      "ByJG\\Util\\": "thirdparty/ByJG/Util"
+      "ByJG\\ApiTools\\": "src/"
     }
   },
   "autoload-dev": {

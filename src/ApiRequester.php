@@ -2,8 +2,7 @@
 
 namespace ByJG\ApiTools;
 
-use ByJG\Util\Exception\CurlException;
-use ByJG\Util\HttpClient;
+use GuzzleHttp\Client;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -12,7 +11,9 @@ use Psr\Http\Message\ResponseInterface;
  */
 class ApiRequester extends AbstractRequester
 {
-    /** @var HttpClient */
+    /**
+     * @var Client
+     */
     private $httpClient;
 
     /**
@@ -20,8 +21,7 @@ class ApiRequester extends AbstractRequester
      */
     public function __construct()
     {
-        $this->httpClient = HttpClient::getInstance()
-            ->withNoFollowRedirect();
+        $this->httpClient = new Client();
 
         parent::__construct();
     }
@@ -30,11 +30,12 @@ class ApiRequester extends AbstractRequester
      * @param RequestInterface $request
      *
      * @return ResponseInterface
-     * @throws CurlException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
      */
     protected function handleRequest(RequestInterface $request)
     {
         $request = $request->withHeader("User-Agent", "ByJG Swagger Test");
+
         return $this->httpClient->sendRequest($request);
     }
 }

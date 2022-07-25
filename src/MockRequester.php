@@ -3,14 +3,17 @@
 
 namespace ByJG\ApiTools;
 
-use ByJG\Util\Exception\CurlException;
-use ByJG\Util\MockClient;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class MockRequester extends AbstractRequester
 {
-    /** @var MockClient */
+    /**
+     * @var Client
+     */
     private $httpClient;
 
     /**
@@ -19,7 +22,10 @@ class MockRequester extends AbstractRequester
      */
     public function __construct(ResponseInterface $expectedResponse)
     {
-        $this->httpClient = new MockClient($expectedResponse);
+        $mockHandler = new MockHandler([$expectedResponse]);
+        $handlerStack = HandlerStack::create($mockHandler);
+        $this->httpClient = new Client(['handler' => $handlerStack]);
+
         parent::__construct();
     }
 
@@ -27,11 +33,12 @@ class MockRequester extends AbstractRequester
      * @param RequestInterface $request
      *
      * @return ResponseInterface
-     * @throws CurlException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
      */
     protected function handleRequest(RequestInterface $request)
     {
         $request = $request->withHeader("User-Agent", "ByJG Swagger Test");
+
         return $this->httpClient->sendRequest($request);
     }
 }
