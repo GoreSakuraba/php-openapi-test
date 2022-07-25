@@ -135,7 +135,7 @@ abstract class TestingTestCase extends ApiTestCase
      */
     public function testMultipart()
     {
-        $psr7Requester = new Request('post', '/inventory', ['Content-Type' => 'multipart/form-data'], new MultipartStream([
+        $multipartStream = new MultipartStream([
             [
                 'name'     => 'note',
                 'contents' => 'somenote'
@@ -144,14 +144,16 @@ abstract class TestingTestCase extends ApiTestCase
                 'name'     => 'upfile',
                 'contents' => Utils::tryFopen(__DIR__ . '/smile.png', 'rb'),
             ],
-        ]));
+        ]);
+
+        $psr7Requester = new Request('post', '/inventory', ['Content-Type' => 'multipart/form-data; boundary=' . $multipartStream->getBoundary()], $multipartStream);
 
         $request = new ApiRequester();
         $request
             ->withPsr7Request($psr7Requester)
             ->assertResponseCode(200)
-            ->assertBodyContains("smile")
-            ->assertBodyContains("somenote");
+            ->assertBodyContains('smile.png')
+            ->assertBodyContains('somenote');
 
         $this->assertRequest($request);
     }
