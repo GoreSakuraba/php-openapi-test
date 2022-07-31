@@ -3,6 +3,7 @@
 namespace ByJG\ApiTools;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -30,12 +31,16 @@ class ApiRequester extends AbstractRequester
      * @param RequestInterface $request
      *
      * @return ResponseInterface
-     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function handleRequest(RequestInterface $request)
     {
         $request = $request->withHeader("User-Agent", "ByJG Swagger Test");
 
-        return $this->httpClient->sendRequest($request);
+        return $this->httpClient->send($request, [
+            RequestOptions::SYNCHRONOUS     => true,
+            RequestOptions::ALLOW_REDIRECTS => false,
+            RequestOptions::HTTP_ERRORS     => false,
+        ]);
     }
 }

@@ -7,12 +7,13 @@
   "require": {
     "php": ">=7.3",
     "ext-json": "*",
-    "guzzlehttp/guzzle": "^7.4",
-    "guzzlehttp/psr7": "^2.4"
+    "guzzlehttp/guzzle": "^6.5 || ^7.4",
+    "guzzlehttp/psr7": "^1.9 || ^2.4"
   },
   "require-dev": {
     "slim/slim": "^4.10",
-    "phpunit/phpunit": "^9.5"
+    "phpunit/phpunit": "^9.5",
+    "slim/psr7": "^1.5"
   },
   "autoload": {
     "psr-4": {
