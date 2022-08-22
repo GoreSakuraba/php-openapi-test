@@ -3,6 +3,7 @@
 namespace Test\Rest\Classes;
 
 use GuzzleHttp\Psr7\Utils;
+use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -15,13 +16,13 @@ class Handler
      * @param array                  $args
      *
      * @return ResponseInterface
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function getPetById(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $pet = new Pet(
             $args['id'],
-            new Category(101, "cat"),
+            new Category(101, 'cat'),
             'Doris',
             [],
             [new Tag(1, 'gray')],
@@ -37,7 +38,7 @@ class Handler
      * @param array                  $args
      *
      * @return ResponseInterface
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function addPet(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
@@ -65,9 +66,9 @@ class Handler
             $requestBody->{'status'} ?? ''
         );
 
-        if ($pet->getId() == '999') {
+        if ($pet->getId() === 999) {
             // Simulate an error
-            return $response->withBody(Utils::streamFor(json_encode(["status" => "ERROR"], JSON_THROW_ON_ERROR)));
+            return $response->withBody(Utils::streamFor(json_encode(['status' => 'ERROR'], JSON_THROW_ON_ERROR)));
         }
 
         // Expected empty response.
@@ -80,7 +81,7 @@ class Handler
      * @param array                  $args
      *
      * @return ResponseInterface
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function processUpload(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
@@ -91,13 +92,13 @@ class Handler
         }
 
         $tags = [];
-        if (isset($request->getParsedBody()["note"])) {
-            $tags[] = new Tag(1, $request->getParsedBody()["note"]);
+        if (isset($request->getParsedBody()['note'])) {
+            $tags[] = new Tag(1, $request->getParsedBody()['note']);
         }
 
         $pet = new Pet(
             200,
-            new Category(101, "cat"),
+            new Category(101, 'cat'),
             'Doris',
             $photoUrls,
             $tags,

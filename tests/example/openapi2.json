@@ -255,7 +255,9 @@
       },
       "AnyValue": {},
       "NameObject": {
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
           "name": {
             "type": "string"
@@ -263,7 +265,9 @@
         }
       },
       "EmailObject": {
-        "required": ["email"],
+        "required": [
+          "email"
+        ],
         "properties": {
           "email": {
             "type": "string"

@@ -13,7 +13,8 @@ use ByJG\ApiTools\Exception\RequiredArgumentNotFound;
 class OpenApiRequestBody extends Body
 {
     /**
-     * @param string $body
+     * @param array|string $body
+     *
      * @return bool
      * @throws GenericSwaggerException
      * @throws InvalidDefinitionException
@@ -22,7 +23,7 @@ class OpenApiRequestBody extends Body
      * @throws RequiredArgumentNotFound
      * @throws DefinitionNotFoundException
      */
-    public function match($body)
+    public function match($body): bool
     {
         if (isset($this->structure['content']) || isset($this->structure['$ref'])) {
             if (isset($this->structure['required']) && $this->structure['required'] === true && empty($body)) {

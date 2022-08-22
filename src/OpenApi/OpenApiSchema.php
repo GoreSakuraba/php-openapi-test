@@ -10,22 +10,24 @@ use ByJG\ApiTools\Exception\NotMatchedException;
 use ByJG\ApiTools\Exception\PathNotFoundException;
 use GuzzleHttp\Psr7\Uri;
 use InvalidArgumentException;
+use JsonException;
 
 class OpenApiSchema extends Schema
 {
-
-    protected $serverVariables = [];
+    protected array $serverVariables = [];
 
     /**
      * Initialize with schema data, which can be a PHP array or encoded as JSON.
      *
      * @param array|string $data
+     *
+     * @throws JsonException
      */
     public function __construct($data)
     {
         // when given a string, decode from JSON
         if (is_string($data)) {
-            $data = json_decode($data, true);
+            $data = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
         }
         // make sure we got an array
         if (!is_array($data)) {
@@ -34,6 +36,9 @@ class OpenApiSchema extends Schema
         $this->jsonFile = $data;
     }
 
+    /**
+     * @return array|mixed|string|string[]|null
+     */
     public function getServerUrl()
     {
         if (!isset($this->jsonFile['servers'])) {
@@ -50,45 +55,49 @@ class OpenApiSchema extends Schema
         }
 
         foreach ($this->serverVariables as $var => $value) {
-            $serverUrl = preg_replace("/\{$var\}/", $value, $serverUrl);
+            $serverUrl = preg_replace("/\{$var}/", $value, $serverUrl);
         }
 
         return $serverUrl;
     }
 
-    public function getBasePath()
+    /**
+     * @return string
+     */
+    public function getBasePath(): string
     {
-        $uriServer = new Uri($this->getServerUrl());
-        return $uriServer->getPath();
+        return (new Uri($this->getServerUrl()))->getPath();
     }
 
     /**
-     * @param $parameterIn
-     * @param $parameters
-     * @param $arguments
+     * @param mixed $parameterIn
+     * @param array $parameters
+     * @param array $arguments
+     *
+     * @return void
      * @throws DefinitionNotFoundException
      * @throws InvalidDefinitionException
      * @throws NotMatchedException
      */
-    protected function validateArguments($parameterIn, $parameters, $arguments)
+    protected function validateArguments($parameterIn, array $parameters, array $arguments): void
     {
         foreach ($parameters as $parameter) {
             if (isset($parameter['$ref'])) {
-                $paramParts = explode("/", $parameter['$ref']);
-                if (count($paramParts) != 4 || $paramParts[0] != "#" || $paramParts[1] != self::SWAGGER_COMPONENTS || $paramParts[2] != self::SWAGGER_PARAMETERS) {
+                $paramParts = explode('/', $parameter['$ref']);
+                if (count($paramParts) !== 4 || $paramParts[0] !== '#' || $paramParts[1] !== self::SWAGGER_COMPONENTS || $paramParts[2] !== self::SWAGGER_PARAMETERS) {
                     throw new InvalidDefinitionException(
-                        "Not get the reference in the expected format #/components/parameters/<NAME>"
+                        'Not get the reference in the expected format #/components/parameters/<NAME>'
                     );
                 }
                 if (!isset($this->jsonFile[self::SWAGGER_COMPONENTS][self::SWAGGER_PARAMETERS][$paramParts[3]])) {
                     throw new DefinitionNotFoundException(
-                        "Not find reference #/components/parameters/${paramParts[3]}"
+                        "Not find reference #/components/parameters/$paramParts[3]"
                     );
                 }
                 $parameter = $this->jsonFile[self::SWAGGER_COMPONENTS][self::SWAGGER_PARAMETERS][$paramParts[3]];
             }
-            if ($parameter['in'] === $parameterIn &&
-                $parameter['schema']['type'] === "integer"
+            if ($parameter['in'] === $parameterIn
+                && $parameter['schema']['type'] === 'integer'
                 && filter_var($arguments[$parameter['name']], FILTER_VALIDATE_INT) === false) {
                 throw new NotMatchedException('Path expected an integer value');
             }
@@ -96,12 +105,13 @@ class OpenApiSchema extends Schema
     }
 
     /**
-     * @param $name
+     * @param string $name
+     *
      * @return mixed
      * @throws DefinitionNotFoundException
      * @throws InvalidDefinitionException
      */
-    public function getDefinition($name)
+    public function getDefinition(string $name)
     {
         $nameParts = explode('/', $name);
 
@@ -110,15 +120,16 @@ class OpenApiSchema extends Schema
         }
 
         if (!isset($this->jsonFile[$nameParts[1]][$nameParts[2]][$nameParts[3]])) {
-            throw new DefinitionNotFoundException("Component'$name' not found");
+            throw new DefinitionNotFoundException("Component '$name' not found");
         }
 
         return $this->jsonFile[$nameParts[1]][$nameParts[2]][$nameParts[3]];
     }
 
     /**
-     * @param $path
-     * @param $method
+     * @param string $path
+     * @param string $method
+     *
      * @return OpenApiRequestBody
      * @throws DefinitionNotFoundException
      * @throws HttpMethodNotFoundException
@@ -126,18 +137,27 @@ class OpenApiSchema extends Schema
      * @throws NotMatchedException
      * @throws PathNotFoundException
      */
-    public function getRequestParameters($path, $method)
+    public function getRequestParameters(string $path, string $method): OpenApiRequestBody
     {
         $structure = $this->getPathDefinition($path, $method);
 
         if (!isset($structure['requestBody'])) {
             return new OpenApiRequestBody($this, "$method $path", []);
         }
+
         return new OpenApiRequestBody($this, "$method $path", $structure['requestBody']);
     }
 
-    public function setServerVariable($var, $value)
+    /**
+     * @param string $var
+     * @param mixed  $value
+     *
+     * @return OpenApiSchema
+     */
+    public function setServerVariable(string $var, $value): OpenApiSchema
     {
         $this->serverVariables[$var] = $value;
+
+        return $this;
     }
 }

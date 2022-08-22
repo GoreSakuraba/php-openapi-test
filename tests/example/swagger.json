@@ -134,7 +134,7 @@
         "tags": [
           "pet"
         ],
-        "summary": "Finds Pets by status",
+        "summary": "Find pets by status",
         "description": "Multiple status values can be provided with comma separated strings",
         "operationId": "findPetsByStatus",
         "produces": [
@@ -256,7 +256,7 @@
         },
         "security": [
           {
-            "api_key": []
+            "api_key": [ ]
           }
         ]
       }
@@ -299,7 +299,7 @@
         },
         "security": [
           {
-            "api_key": []
+            "api_key": [ ]
           }
         ]
       },
@@ -467,7 +467,7 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [],
+        "parameters": [ ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -482,7 +482,7 @@
         },
         "security": [
           {
-            "api_key": []
+            "api_key": [ ]
           }
         ]
       }
@@ -529,7 +529,7 @@
           "store"
         ],
         "summary": "Find purchase order by ID",
-        "description": "For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions",
+        "description": "For valid response try integer IDs with value >= 1 and <= 10. Other values will generate exceptions",
         "operationId": "getOrderById",
         "produces": [
           "application/xml",
@@ -600,7 +600,7 @@
           "user"
         ],
         "summary": "Create user",
-        "description": "This can only be done by the logged in user.",
+        "description": "This can only be done by the logged-in user.",
         "operationId": "createUser",
         "produces": [
           "application/xml",
@@ -706,7 +706,7 @@
           {
             "name": "username",
             "in": "query",
-            "description": "The user name for login",
+            "description": "The username for login",
             "required": true,
             "type": "string"
           },
@@ -748,14 +748,14 @@
         "tags": [
           "user"
         ],
-        "summary": "Logs out current logged in user session",
+        "summary": "Logs out current logged-in user session",
         "description": "",
         "operationId": "logoutUser",
         "produces": [
           "application/xml",
           "application/json"
         ],
-        "parameters": [],
+        "parameters": [ ],
         "responses": {
           "default": {
             "description": "successful operation"
@@ -768,7 +768,7 @@
         "tags": [
           "user"
         ],
-        "summary": "Get user by user name",
+        "summary": "Get user by username",
         "description": "",
         "operationId": "getUserByName",
         "produces": [
@@ -804,7 +804,7 @@
           "user"
         ],
         "summary": "Updated user",
-        "description": "This can only be done by the logged in user.",
+        "description": "This can only be done by the logged-in user.",
         "operationId": "updateUser",
         "produces": [
           "application/xml",
@@ -842,7 +842,7 @@
           "user"
         ],
         "summary": "Delete user",
-        "description": "This can only be done by the logged in user.",
+        "description": "This can only be done by the logged-in user.",
         "operationId": "deleteUser",
         "produces": [
           "application/xml",

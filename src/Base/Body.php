@@ -11,52 +11,34 @@ use ByJG\ApiTools\OpenApi\OpenApiResponseBody;
 use ByJG\ApiTools\OpenApi\OpenApiSchema;
 use ByJG\ApiTools\Swagger\SwaggerResponseBody;
 use ByJG\ApiTools\Swagger\SwaggerSchema;
-use InvalidArgumentException;
 
 abstract class Body
 {
-    const SWAGGER_PROPERTIES="properties";
-    const SWAGGER_ADDITIONAL_PROPERTIES="additionalProperties";
-    const SWAGGER_REQUIRED="required";
-
-    /**
-     * @var Schema
-     */
-    protected $schema;
-
+    private const SWAGGER_PROPERTIES = 'properties';
+    private const SWAGGER_ADDITIONAL_PROPERTIES = 'additionalProperties';
+    private const SWAGGER_REQUIRED = 'required';
+    protected Schema $schema;
     /**
      * @var array
      */
-    protected $structure;
-
-    /**
-     * @var string
-     */
-    protected $name;
-
+    protected array $structure;
+    protected string $name;
     /**
      * OpenApi 2.0 does not describe null values, so this flag defines,
      * if match is ok when one of property, which has type, is null
-     *
-     * @var bool
      */
-    protected $allowNullValues;
+    protected bool $allowNullValues;
 
     /**
-     * Body constructor.
-     *
      * @param Schema $schema
      * @param string $name
-     * @param array $structure
-     * @param bool $allowNullValues
+     * @param array  $structure
+     * @param bool   $allowNullValues
      */
-    public function __construct(Schema $schema, $name, $structure, $allowNullValues = false)
+    public function __construct(Schema $schema, string $name, array $structure, bool $allowNullValues = false)
     {
         $this->schema = $schema;
         $this->name = $name;
-        if (!is_array($structure)) {
-            throw new InvalidArgumentException('I expected the structure to be an array');
-        }
         $this->structure = $structure;
         $this->allowNullValues = $allowNullValues;
     }
@@ -64,12 +46,13 @@ abstract class Body
     /**
      * @param Schema $schema
      * @param string $name
-     * @param array $structure
-     * @param bool $allowNullValues
+     * @param array  $structure
+     * @param bool   $allowNullValues
+     *
      * @return OpenApiResponseBody|SwaggerResponseBody
      * @throws GenericSwaggerException
      */
-    public static function getInstance(Schema $schema, $name, $structure, $allowNullValues = false)
+    public static function getInstance(Schema $schema, string $name, array $structure, bool $allowNullValues = false)
     {
         if ($schema instanceof SwaggerSchema) {
             return new SwaggerResponseBody($schema, $name, $structure, $allowNullValues);
@@ -79,27 +62,33 @@ abstract class Body
             return new OpenApiResponseBody($schema, $name, $structure, $allowNullValues);
         }
 
-        throw new GenericSwaggerException("Cannot get instance SwaggerBody or SchemaBody from " . get_class($schema));
+        throw new GenericSwaggerException('Cannot get instance SwaggerBody or SchemaBody from ' . get_class($schema));
     }
 
-    abstract public function match($body);
+    /**
+     * @param mixed $body
+     *
+     * @return bool
+     */
+    abstract public function match($body): bool;
 
     /**
      * @param string $name
-     * @param array $schemaArray
-     * @param string $body
+     * @param array  $schemaArray
+     * @param mixed  $body
      * @param string $type
-     * @return bool
+     *
+     * @return bool|null
      * @throws NotMatchedException
      */
-    protected function matchString($name, $schemaArray, $body, $type)
+    protected function matchString(string $name, array $schemaArray, $body, string $type): ?bool
     {
         if ($type !== 'string') {
             return null;
         }
 
-        if (isset($schemaArray['enum']) && !in_array($body, $schemaArray['enum'])) {
-            throw new NotMatchedException("Value '$body' in '$name' not matched in ENUM. ", $this->structure);
+        if (isset($schemaArray['enum']) && !in_array($body, $schemaArray['enum'], true)) {
+            throw new NotMatchedException("Value '$body' in '$name' not matched in ENUM.", $this->structure);
         }
 
         if (isset($schemaArray['pattern'])) {
@@ -107,30 +96,39 @@ abstract class Body
         }
 
         if (!is_string($body)) {
-            throw new NotMatchedException("Value '" . var_export($body, true) . "' in '$name' not matched in pattern. ", $this->structure);
+            throw new NotMatchedException('Value \'' . var_export($body, true) . "' in '$name' not matched in pattern.", $this->structure);
         }
 
         return true;
     }
 
-    private function checkPattern($name, $body, $pattern)
+    /**
+     * @param string $name
+     * @param mixed  $body
+     * @param string $pattern
+     *
+     * @return void
+     * @throws NotMatchedException
+     */
+    private function checkPattern(string $name, $body, string $pattern): void
     {
         $pattern = '/' . rtrim(ltrim($pattern, '/'), '/') . '/';
-        $isSuccess = (bool) preg_match($pattern, $body, $matches);
+        $isSuccess = preg_match($pattern, $body) === 1;
 
         if (!$isSuccess) {
-            throw new NotMatchedException("Value '$body' in '$name' not matched in pattern. ", $this->structure);
+            throw new NotMatchedException("Value '$body' in '$name' not matched in pattern.", $this->structure);
         }
     }
 
     /**
      * @param string $name
-     * @param array $schemaArray
-     * @param string $body
+     * @param array  $schemaArray
+     * @param mixed  $body
      * @param string $type
-     * @return bool
+     *
+     * @return bool|null
      */
-    protected function matchFile($name, $schemaArray, $body, $type)
+    protected function matchFile(string $name, array $schemaArray, $body, string $type): ?bool
     {
         if ($type !== 'file') {
             return null;
@@ -141,19 +139,21 @@ abstract class Body
 
     /**
      * @param string $name
-     * @param string $body
+     * @param array  $schemaArray
+     * @param mixed  $body
      * @param string $type
-     * @return bool
+     *
+     * @return bool|null
      * @throws NotMatchedException
      */
-    protected function matchNumber($name, $body, $type)
+    protected function matchNumber(string $name, array $schemaArray, $body, string $type): ?bool
     {
         if ($type !== 'integer' && $type !== 'float' && $type !== 'number') {
             return null;
         }
 
         if (!is_numeric($body)) {
-            throw new NotMatchedException("Expected '$name' to be numeric, but found '$body'. ", $this->structure);
+            throw new NotMatchedException("Expected '$name' to be numeric, but found '$body'.", $this->structure);
         }
 
         if (isset($schemaArray['pattern'])) {
@@ -165,19 +165,20 @@ abstract class Body
 
     /**
      * @param string $name
-     * @param string $body
+     * @param mixed  $body
      * @param string $type
-     * @return bool
+     *
+     * @return bool|null
      * @throws NotMatchedException
      */
-    protected function matchBool($name, $body, $type)
+    protected function matchBool(string $name, $body, string $type): ?bool
     {
         if ($type !== 'bool' && $type !== 'boolean') {
             return null;
         }
 
         if (!is_bool($body)) {
-            throw new NotMatchedException("Expected '$name' to be boolean, but found '$body'. ", $this->structure);
+            throw new NotMatchedException("Expected '$name' to be boolean, but found '$body'.", $this->structure);
         }
 
         return true;
@@ -185,17 +186,18 @@ abstract class Body
 
     /**
      * @param string $name
-     * @param array $schemaArray
-     * @param string $body
+     * @param array  $schemaArray
+     * @param mixed  $body
      * @param string $type
-     * @return bool
+     *
+     * @return bool|null
      * @throws DefinitionNotFoundException
      * @throws GenericSwaggerException
      * @throws InvalidDefinitionException
      * @throws InvalidRequestException
      * @throws NotMatchedException
      */
-    protected function matchArray($name, $schemaArray, $body, $type)
+    protected function matchArray(string $name, array $schemaArray, $body, string $type): ?bool
     {
         if ($type !== 'array') {
             return null;
@@ -207,16 +209,18 @@ abstract class Body
             }
             $this->matchSchema($name, $schemaArray['items'], $item);
         }
+
         return true;
     }
 
     /**
      * @param string $name
-     * @param array $schemaArray
-     * @param string $body
-     * @return mixed|null
+     * @param array  $schemaArray
+     * @param mixed  $body
+     *
+     * @return bool|null
      */
-    protected function matchTypes($name, $schemaArray, $body)
+    protected function matchTypes(string $name, array $schemaArray, $body): ?bool
     {
         if (!isset($schemaArray['type'])) {
             return null;
@@ -226,33 +230,27 @@ abstract class Body
         $nullable = isset($schemaArray['nullable']) ? (bool)$schemaArray['nullable'] : $this->schema->isAllowNullValues();
 
         $validators = [
-            function () use ($name, $body, $type, $nullable)
-            {
+            function () use ($name, $body, $type, $nullable) {
                 return $this->matchNull($name, $body, $type, $nullable);
             },
 
-            function () use ($name, $schemaArray, $body, $type)
-            {
+            function () use ($name, $schemaArray, $body, $type) {
                 return $this->matchString($name, $schemaArray, $body, $type);
             },
 
-            function () use ($name, $body, $type)
-            {
-                return $this->matchNumber($name, $body, $type);
+            function () use ($name, $schemaArray, $body, $type) {
+                return $this->matchNumber($name, $schemaArray, $body, $type);
             },
 
-            function () use ($name, $body, $type)
-            {
+            function () use ($name, $body, $type) {
                 return $this->matchBool($name, $body, $type);
             },
 
-            function () use ($name, $schemaArray, $body, $type)
-            {
+            function () use ($name, $schemaArray, $body, $type) {
                 return $this->matchArray($name, $schemaArray, $body, $type);
             },
 
-            function () use ($name, $schemaArray, $body, $type)
-            {
+            function () use ($name, $schemaArray, $body, $type) {
                 return $this->matchFile($name, $schemaArray, $body, $type);
             },
         ];
@@ -268,9 +266,10 @@ abstract class Body
     }
 
     /**
-     * @param string $name
-     * @param array $schemaArray
-     * @param string $body
+     * @param string       $name
+     * @param array        $schemaArray
+     * @param array|string $body
+     *
      * @return bool|null
      * @throws DefinitionNotFoundException
      * @throws GenericSwaggerException
@@ -278,7 +277,7 @@ abstract class Body
      * @throws InvalidRequestException
      * @throws NotMatchedException
      */
-    public function matchObjectProperties($name, $schemaArray, $body)
+    public function matchObjectProperties(string $name, array $schemaArray, $body): ?bool
     {
         if (!isset($schemaArray[self::SWAGGER_ADDITIONAL_PROPERTIES])) {
             $schemaArray[self::SWAGGER_ADDITIONAL_PROPERTIES] = true;
@@ -302,7 +301,7 @@ abstract class Body
 
         if (!is_array($body)) {
             throw new InvalidRequestException(
-                "I expected an array here, but I got an string. Maybe you did wrong request?",
+                'I expected an array here, but I got a string. Maybe you did wrong request?',
                 $body
             );
         }
@@ -311,7 +310,7 @@ abstract class Body
             $schemaArray[self::SWAGGER_REQUIRED] = [];
         }
         foreach ($schemaArray[self::SWAGGER_PROPERTIES] as $prop => $def) {
-            $required = array_search($prop, $schemaArray[self::SWAGGER_REQUIRED]);
+            $required = array_search($prop, $schemaArray[self::SWAGGER_REQUIRED], true);
 
             if (!array_key_exists($prop, $body)) {
                 if ($required !== false) {
@@ -331,33 +330,37 @@ abstract class Body
 
         if (count($schemaArray[self::SWAGGER_REQUIRED]) > 0) {
             throw new NotMatchedException(
-                "The required property(ies) '"
-                . implode(', ', $schemaArray[self::SWAGGER_REQUIRED])
-                . "' does not exists in the body.",
+                sprintf(
+                    'The required property(ies) \'%s\' does not exist in the body.',
+                    implode(', ', $schemaArray[self::SWAGGER_REQUIRED])
+                ),
                 $this->structure
             );
         }
 
-        if (count($body) > 0 && !isset($schemaArray[self::SWAGGER_ADDITIONAL_PROPERTIES])) {
+        if (!isset($schemaArray[self::SWAGGER_ADDITIONAL_PROPERTIES]) && count($body) > 0) {
             throw new NotMatchedException(
-                "The property(ies) '"
-                . implode(', ', array_keys($body))
-                . "' has not defined in '$name'",
+                sprintf(
+                    "The property(ies) '%s' has not defined in '$name'",
+                    implode(', ', array_keys($body))
+                ),
                 $body
             );
         }
 
-        foreach ($body as $name => $prop) {
+        foreach ($body as $propName => $prop) {
             $def = $schemaArray[self::SWAGGER_ADDITIONAL_PROPERTIES];
-            $this->matchSchema($name, $def, $prop);
+            $this->matchSchema($propName, $def, $prop);
         }
+
         return true;
     }
 
     /**
-     * @param string $name
-     * @param array $schemaArray
+     * @param string       $name
+     * @param array        $schemaArray
      * @param array|string $body
+     *
      * @return bool
      * @throws DefinitionNotFoundException
      * @throws InvalidDefinitionException
@@ -365,8 +368,15 @@ abstract class Body
      * @throws InvalidRequestException
      * @throws NotMatchedException
      */
-    protected function matchSchema($name, $schemaArray, $body)
+    protected function matchSchema(string $name, array $schemaArray, $body): bool
     {
+        /**
+         * OpenApi 2.0 does not describe ANY object value
+         * But there is hack that makes ANY object possible, described in link below
+         * To make that hack works, we need such condition
+         *
+         * @link https://stackoverflow.com/questions/32841298/swagger-2-0-what-schema-to-accept-any-complex-json-value
+         */
         if ($schemaArray === []) {
             return true;
         }
@@ -376,13 +386,14 @@ abstract class Body
             return true;
         }
 
-        if(!isset($schemaArray['$ref']) && isset($schemaArray['content'])) {
+        if (!isset($schemaArray['$ref']) && isset($schemaArray['content'])) {
             $schemaArray['$ref'] = $schemaArray['content'][key($schemaArray['content'])]['schema']['$ref'];
         }
 
         // Get References and try to match it again
         if (isset($schemaArray['$ref']) && !is_array($schemaArray['$ref'])) {
             $definition = $this->schema->getDefinition($schemaArray['$ref']);
+
             return $this->matchSchema($schemaArray['$ref'], $definition, $body);
         }
 
@@ -399,16 +410,16 @@ abstract class Body
 
         if (isset($schemaArray['oneOf'])) {
             $matched = false;
-            $catchedException = null;
+            $caughtException = null;
             foreach ($schemaArray['oneOf'] as $schema) {
                 try {
                     $matched = $matched || $this->matchSchema($name, $schema, $body);
                 } catch (NotMatchedException $exception) {
-                    $catchedException = $exception;
+                    $caughtException = $exception;
                 }
             }
-            if ($catchedException !== null && $matched === false) {
-                throw $catchedException;
+            if ($caughtException !== null && $matched === false) {
+                throw $caughtException;
             }
 
             return $matched;
@@ -419,28 +430,19 @@ abstract class Body
             return true;
         }
 
-        /**
-         * OpenApi 2.0 does not describe ANY object value
-         * But there is hack that makes ANY object possible, described in link below
-         * To make that hack works, we need such condition
-         * @link https://stackoverflow.com/questions/32841298/swagger-2-0-what-schema-to-accept-any-complex-json-value
-         */
-        if ($schemaArray === []) {
-            return true;
-        }
-
         throw new GenericSwaggerException("Not all cases are defined. Please open an issue about this. Schema: $name");
     }
 
     /**
      * @param string $name
-     * @param string $body
+     * @param mixed  $body
      * @param string $type
-     * @param bool $nullable
-     * @return bool
+     * @param bool   $nullable
+     *
+     * @return bool|null
      * @throws NotMatchedException
      */
-    protected function matchNull($name, $body, $type, $nullable)
+    protected function matchNull(string $name, $body, string $type, bool $nullable): ?bool
     {
         if (!is_null($body)) {
             return null;

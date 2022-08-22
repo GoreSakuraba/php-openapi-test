@@ -2,55 +2,71 @@
 
 namespace Test;
 
+use ByJG\ApiTools\Exception\DefinitionNotFoundException;
+use ByJG\ApiTools\Exception\HttpMethodNotFoundException;
+use ByJG\ApiTools\Exception\InvalidDefinitionException;
+use ByJG\ApiTools\Exception\NotMatchedException;
+use ByJG\ApiTools\Exception\PathNotFoundException;
 use ByJG\ApiTools\OpenApi\OpenApiSchema;
+use JsonException;
 use PHPUnit\Framework\TestCase;
 
 class OpenApiSchemaTest extends TestCase
 {
-    /**
-     * @var OpenApiSchema
-     */
-    protected $openapiObject;
+    protected ?OpenApiSchema $openapiObject = null;
 
-    public function setUp(): void 
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function setUp(): void
     {
         $this->openapiObject = new OpenApiSchema(file_get_contents(__DIR__ . '/example/openapi.json'));
     }
 
-    public function tearDown(): void 
+    /**
+     * @return void
+     */
+    public function tearDown(): void
     {
         $this->openapiObject = null;
     }
 
-    public function testGetBasePath()
+    /**
+     * @return void
+     */
+    public function testGetBasePath(): void
     {
         $this->assertEquals('/v2', $this->openapiObject->getBasePath());
     }
 
     /**
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
+     * @throws DefinitionNotFoundException
      */
-    public function testGetPathDirectMatch()
+    public function testGetPathDirectMatch(): void
     {
         $this->assertEquals(
             [
-                'tags' => [
+                'tags'        => [
                     'pet',
                 ],
-                'summary' => 'Add a new pet to the store',
+                'summary'     => 'Add a new pet to the store',
                 'description' => '',
                 'operationId' => 'addPet',
                 'requestBody' => [
                     '$ref' => '#/components/requestBodies/Pet',
                 ],
-                'responses' => [
+                'responses'   => [
                     '405' => [
                         'description' => 'Invalid input',
                     ],
                 ],
-                'security' => [
+                'security'    => [
                     [
                         'petstore_auth' => [
                             'write:pets',
@@ -63,16 +79,16 @@ class OpenApiSchemaTest extends TestCase
         );
         $this->assertEquals(
             [
-                'tags' => [
+                'tags'        => [
                     'pet',
                 ],
-                'summary' => 'Update an existing pet',
+                'summary'     => 'Update an existing pet',
                 'description' => '',
                 'operationId' => 'updatePet',
                 'requestBody' => [
                     '$ref' => '#/components/requestBodies/Pet',
                 ],
-                'responses' => [
+                'responses'   => [
                     '400' => [
                         'description' => 'Invalid ID supplied',
                     ],
@@ -83,7 +99,7 @@ class OpenApiSchemaTest extends TestCase
                         'description' => 'Validation exception',
                     ],
                 ],
-                'security' => [
+                'security'    => [
                     [
                         'petstore_auth' => [
                             'write:pets',
@@ -97,37 +113,40 @@ class OpenApiSchemaTest extends TestCase
     }
 
     /**
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetPathPatternMatch()
+    public function testGetPathPatternMatch(): void
     {
         $this->assertEquals(
             [
-                'tags' => [
+                'tags'        => [
                     'pet',
                 ],
-                'summary' => 'Find pet by ID',
+                'summary'     => 'Find pet by ID',
                 'description' => 'Returns a single pet',
                 'operationId' => 'getPetById',
-                'parameters' => [
+                'parameters'  => [
                     [
-                        'name' => 'petId',
-                        'in' => 'path',
+                        'name'        => 'petId',
+                        'in'          => 'path',
                         'description' => 'ID of pet to return',
-                        'required' => true,
-                        'schema' => [
-                            'type' => 'integer',
+                        'required'    => true,
+                        'schema'      => [
+                            'type'   => 'integer',
                             'format' => 'int64',
                         ],
                     ],
                 ],
-                'responses' => [
+                'responses'   => [
                     '200' => [
                         'description' => 'successful operation',
-                        'content' => [
-                            'application/xml' => [
+                        'content'     => [
+                            'application/xml'  => [
                                 'schema' => [
                                     '$ref' => '#/components/schemas/Pet',
                                 ],
@@ -146,7 +165,7 @@ class OpenApiSchemaTest extends TestCase
                         'description' => 'Pet not found',
                     ],
                 ],
-                'security' => [
+                'security'    => [
                     [
                         'api_key' => [],
                     ],
@@ -156,20 +175,20 @@ class OpenApiSchemaTest extends TestCase
         );
         $this->assertEquals(
             [
-                'tags' => [
+                'tags'        => [
                     'pet',
                 ],
-                'summary' => 'Updates a pet in the store with form data',
+                'summary'     => 'Updates a pet in the store with form data',
                 'description' => '',
                 'operationId' => 'updatePetWithForm',
-                'parameters' => [
+                'parameters'  => [
                     [
-                        'name' => 'petId',
-                        'in' => 'path',
+                        'name'        => 'petId',
+                        'in'          => 'path',
                         'description' => 'ID of pet that needs to be updated',
-                        'required' => true,
-                        'schema' => [
-                            'type' => 'integer',
+                        'required'    => true,
+                        'schema'      => [
+                            'type'   => 'integer',
                             'format' => 'int64',
                         ],
                     ],
@@ -178,27 +197,27 @@ class OpenApiSchemaTest extends TestCase
                     'content' => [
                         'application/x-www-form-urlencoded' => [
                             'schema' => [
-                                'type' => 'object',
+                                'type'       => 'object',
                                 'properties' => [
-                                    'name' => [
+                                    'name'   => [
                                         'description' => 'Updated name of the pet',
-                                        'type' => 'string',
+                                        'type'        => 'string',
                                     ],
                                     'status' => [
                                         'description' => 'Updated status of the pet',
-                                        'type' => 'string',
+                                        'type'        => 'string',
                                     ],
                                 ],
                             ],
                         ],
                     ],
                 ],
-                'responses' => [
+                'responses'   => [
                     '405' => [
                         'description' => 'Invalid input',
                     ],
                 ],
-                'security' => [
+                'security'    => [
                     [
                         'petstore_auth' => [
                             'write:pets',
@@ -211,33 +230,33 @@ class OpenApiSchemaTest extends TestCase
         );
         $this->assertEquals(
             [
-                'tags' => [
+                'tags'        => [
                     'pet',
                 ],
-                'summary' => 'Deletes a pet',
+                'summary'     => 'Deletes a pet',
                 'description' => '',
                 'operationId' => 'deletePet',
-                'parameters' => [
+                'parameters'  => [
                     [
-                        'name' => 'api_key',
-                        'in' => 'header',
+                        'name'     => 'api_key',
+                        'in'       => 'header',
                         'required' => false,
-                        'schema' => [
+                        'schema'   => [
                             'type' => 'string',
                         ],
                     ],
                     [
-                        'name' => 'petId',
-                        'in' => 'path',
+                        'name'        => 'petId',
+                        'in'          => 'path',
                         'description' => 'Pet id to delete',
-                        'required' => true,
-                        'schema' => [
-                            'type' => 'integer',
+                        'required'    => true,
+                        'schema'      => [
+                            'type'   => 'integer',
                             'format' => 'int64',
                         ],
                     ],
                 ],
-                'responses' => [
+                'responses'   => [
                     '400' => [
                         'description' => 'Invalid ID supplied',
                     ],
@@ -245,7 +264,7 @@ class OpenApiSchemaTest extends TestCase
                         'description' => 'Pet not found',
                     ],
                 ],
-                'security' => [
+                'security'    => [
                     [
                         'petstore_auth' => [
                             'write:pets',
@@ -259,28 +278,31 @@ class OpenApiSchemaTest extends TestCase
     }
 
     /**
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetPathPatternMatch2()
+    public function testGetPathPatternMatch2(): void
     {
         $this->assertEquals(
             [
-                'tags' => [
+                'tags'        => [
                     'pet',
                 ],
-                'summary' => 'uploads an image',
+                'summary'     => 'uploads an image',
                 'description' => '',
                 'operationId' => 'uploadFile',
-                'parameters' => [
+                'parameters'  => [
                     [
-                        'name' => 'petId',
-                        'in' => 'path',
+                        'name'        => 'petId',
+                        'in'          => 'path',
                         'description' => 'ID of pet to update',
-                        'required' => true,
-                        'schema' => [
-                            'type' => 'integer',
+                        'required'    => true,
+                        'schema'      => [
+                            'type'   => 'integer',
                             'format' => 'int64',
                         ],
                     ],
@@ -289,26 +311,26 @@ class OpenApiSchemaTest extends TestCase
                     'content' => [
                         'multipart/form-data' => [
                             'schema' => [
-                                'type' => 'object',
+                                'type'       => 'object',
                                 'properties' => [
                                     'additionalMetadata' => [
                                         'description' => 'Additional data to pass to server',
-                                        'type' => 'string',
+                                        'type'        => 'string',
                                     ],
-                                    'file' => [
+                                    'file'               => [
                                         'description' => 'file to upload',
-                                        'type' => 'string',
-                                        'format' => 'binary',
+                                        'type'        => 'string',
+                                        'format'      => 'binary',
                                     ],
                                 ],
                             ],
                         ],
                     ],
                 ],
-                'responses' => [
+                'responses'   => [
                     '200' => [
                         'description' => 'successful operation',
-                        'content' => [
+                        'content'     => [
                             'application/json' => [
                                 'schema' => [
                                     '$ref' => '#/components/schemas/ApiResponse',
@@ -317,7 +339,7 @@ class OpenApiSchemaTest extends TestCase
                         ],
                     ],
                 ],
-                'security' => [
+                'security'    => [
                     [
                         'petstore_auth' => [
                             'write:pets',
@@ -332,51 +354,58 @@ class OpenApiSchemaTest extends TestCase
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetPathFail()
+    public function testGetPathFail(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\PathNotFoundException::class);
+        $this->expectException(PathNotFoundException::class);
 
         $this->openapiObject->getPathDefinition('/v2/pets', 'get');
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testPathExistsButMethodDont()
+    public function testPathExistsButMethodDont(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\HttpMethodNotFoundException::class);
+        $this->expectException(HttpMethodNotFoundException::class);
 
         $this->openapiObject->getPathDefinition('/v2/pet', 'GET');
     }
 
     /**
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetPathStructure()
+    public function testGetPathStructure(): void
     {
         $pathDefintion = $this->openapiObject->getPathDefinition('/v2/pet', 'PUT');
         $this->assertEquals(
             [
-                'tags' => [
+                'tags'        => [
                     'pet',
                 ],
-                'summary' => 'Update an existing pet',
+                'summary'     => 'Update an existing pet',
                 'description' => '',
                 'operationId' => 'updatePet',
                 'requestBody' => [
                     '$ref' => '#/components/requestBodies/Pet',
                 ],
-                'responses' => [
+                'responses'   => [
                     '400' => [
                         'description' => 'Invalid ID supplied',
                     ],
@@ -387,13 +416,13 @@ class OpenApiSchemaTest extends TestCase
                         'description' => 'Validation exception',
                     ],
                 ],
-                'security' => [
+                'security'    => [
                     [
                         'petstore_auth' => [
                             'write:pets',
                             'read:pets',
                         ],
-                    ]
+                    ],
                 ],
             ],
             $pathDefintion
@@ -401,83 +430,84 @@ class OpenApiSchemaTest extends TestCase
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
      */
-    public function testGetDefinitionFailed()
+    public function testGetDefinitionFailed(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\InvalidDefinitionException::class);
+        $this->expectException(InvalidDefinitionException::class);
 
         $this->openapiObject->getDefinition('Order');
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
      */
-    public function testGetDefinitionFailed2()
+    public function testGetDefinitionFailed2(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\InvalidDefinitionException::class);
+        $this->expectException(InvalidDefinitionException::class);
 
         $this->openapiObject->getDefinition('1/2/Order');
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
      */
-    public function testGetDefinitionFailed3()
+    public function testGetDefinitionFailed3(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\DefinitionNotFoundException::class);
+        $this->expectException(DefinitionNotFoundException::class);
 
         $this->openapiObject->getDefinition('#/components/schemas/OrderNOtFound');
     }
 
     /**
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
      */
-    public function testGetDefinition()
+    public function testGetDefinition(): void
     {
         $expected = [
-            "type"       => "object",
-            "additionalProperties" => false,
-            "properties" => [
-                "id"       => [
-                    "type"   => "integer",
-                    "format" => "int64",
+            'type'                 => 'object',
+            'additionalProperties' => false,
+            'properties'           => [
+                'id'       => [
+                    'type'   => 'integer',
+                    'format' => 'int64',
                 ],
-                "petId"    => [
-                    "type"   => "integer",
-                    "format" => "int64",
+                'petId'    => [
+                    'type'   => 'integer',
+                    'format' => 'int64',
                 ],
-                "quantity" => [
-                    "type"   => "integer",
-                    "format" => "int32",
+                'quantity' => [
+                    'type'   => 'integer',
+                    'format' => 'int32',
                 ],
-                "shipDate" => [
-                    "type"   => "string",
-                    "format" => "date-time",
+                'shipDate' => [
+                    'type'   => 'string',
+                    'format' => 'date-time',
                 ],
-                "status"   => [
-                    "type"        => "string",
-                    "description" => "Order Status",
-                    "enum"        => [
-                        "placed",
-                        "approved",
-                        "delivered",
+                'status'   => [
+                    'type'        => 'string',
+                    'description' => 'Order Status',
+                    'enum'        => [
+                        'placed',
+                        'approved',
+                        'delivered',
                     ],
                 ],
-                "complete" => [
-                    "type"    => "boolean",
-                    "default" => false,
+                'complete' => [
+                    'type'    => 'boolean',
+                    'default' => false,
                 ],
             ],
-            "xml"        => [
-                "name" => "Order",
+            'xml'                  => [
+                'name' => 'Order',
             ],
         ];
 
@@ -485,23 +515,34 @@ class OpenApiSchemaTest extends TestCase
         $this->assertEquals($expected, $order);
     }
 
-    public function testGetServerUrl()
+    /**
+     * @return void
+     */
+    public function testGetServerUrl(): void
     {
-        $this->assertEquals("http://petstore.swagger.io/v2", $this->openapiObject->getServerUrl());
+        $this->assertEquals('http://petstore.swagger.io/v2', $this->openapiObject->getServerUrl());
     }
 
-    public function testGetServerUrlVariables()
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function testGetServerUrlVariables(): void
     {
         $this->openapiObject = new OpenApiSchema(file_get_contents(__DIR__ . '/example/openapi4.json'));
 
-        $this->assertEquals("https://www.domain.com/api/v2", $this->openapiObject->getServerUrl());
+        $this->assertEquals('https://www.domain.com/api/v2', $this->openapiObject->getServerUrl());
     }
 
-    public function testGetServerUrlVariables2()
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function testGetServerUrlVariables2(): void
     {
         $this->openapiObject = new OpenApiSchema(file_get_contents(__DIR__ . '/example/openapi4.json'));
-        $this->openapiObject->setServerVariable("environment", "staging");
+        $this->openapiObject->setServerVariable('environment', 'staging');
 
-        $this->assertEquals("https://staging.domain.com/api/v2", $this->openapiObject->getServerUrl());
+        $this->assertEquals('https://staging.domain.com/api/v2', $this->openapiObject->getServerUrl());
     }
 }

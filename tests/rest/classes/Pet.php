@@ -2,25 +2,34 @@
 
 namespace Test\Rest\Classes;
 
-class Pet implements \JsonSerializable
+use JsonSerializable;
+
+class Pet implements JsonSerializable
 {
-    protected $id;
-    protected $category;
-    protected $name;
-    protected $photoUrls;
-    protected $tags;
-    protected $status;
+    protected int $id;
+    protected ?Category $category;
+    protected string $name;
+    /**
+     * @var array<string>
+     */
+    protected array $photoUrls;
+    /**
+     * @var array<Tag>
+     */
+    protected array $tags;
+    protected string $status;
 
     /**
      * Pet constructor.
-     * @param $id
-     * @param $category
-     * @param $name
-     * @param $photoUrls
-     * @param $tags
-     * @param $status
+     *
+     * @param int                   $id
+     * @param Category|null         $category
+     * @param string                $name
+     * @param array<string, string> $photoUrls
+     * @param array<Tag>            $tags
+     * @param string                $status
      */
-    public function __construct($id = "", $category = "", $name = "", $photoUrls = "", $tags = "", $status = "")
+    public function __construct(int $id, ?Category $category, string $name, array $photoUrls, array $tags, string $status)
     {
         $this->id = $id;
         $this->category = $category;
@@ -30,101 +39,124 @@ class Pet implements \JsonSerializable
         $this->status = $status;
     }
 
-
     /**
-     * @return mixed
+     * @return int
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * @param mixed $id
+     * @param int $id
+     *
+     * @return Pet
      */
-    public function setId($id)
+    public function setId(int $id): Pet
     {
         $this->id = $id;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return Category|null
      */
-    public function getCategory()
+    public function getCategory(): ?Category
     {
         return $this->category;
     }
 
     /**
-     * @param mixed $category
+     * @param Category|null $category
+     *
+     * @return Pet
      */
-    public function setCategory($category)
+    public function setCategory(?Category $category): Pet
     {
         $this->category = $category;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
+     *
+     * @return Pet
      */
-    public function setName($name)
+    public function setName(string $name): Pet
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return array<string, string>
      */
-    public function getPhotoUrls()
+    public function getPhotoUrls(): array
     {
         return $this->photoUrls;
     }
 
     /**
-     * @param mixed $photoUrls
+     * @param array<string, string> $photoUrls
+     *
+     * @return Pet
      */
-    public function setPhotoUrls($photoUrls)
+    public function setPhotoUrls(array $photoUrls): Pet
     {
         $this->photoUrls = $photoUrls;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return array<Tag>
      */
-    public function getTags()
+    public function getTags(): array
     {
         return $this->tags;
     }
 
     /**
-     * @param mixed $tags
+     * @param array<Tag> $tags
+     *
+     * @return Pet
      */
-    public function setTags($tags)
+    public function setTags(array $tags): Pet
     {
         $this->tags = $tags;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->status;
     }
 
     /**
-     * @param mixed $status
+     * @param string $status
+     *
+     * @return Pet
      */
-    public function setStatus($status)
+    public function setStatus(string $status): Pet
     {
         $this->status = $status;
+
+        return $this;
     }
 
     /**
@@ -133,12 +165,12 @@ class Pet implements \JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            'id' => $this->getId(),
-            'category' => $this->getCategory(),
-            'name' => $this->getName(),
+            'id'        => $this->getId(),
+            'category'  => $this->getCategory(),
+            'name'      => $this->getName(),
             'photoUrls' => $this->getPhotoUrls(),
-            'tags' => $this->getTags(),
-            'status' => $this->getStatus(),
+            'tags'      => $this->getTags(),
+            'status'    => $this->getStatus(),
         ];
     }
 }

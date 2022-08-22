@@ -8,34 +8,32 @@ use ByJG\ApiTools\Exception\NotMatchedException;
 use ByJG\ApiTools\Exception\StatusCodeNotMatchedException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\Utils;
+use JsonException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
  * Abstract baseclass for request handlers.
- *
  * The baseclass provides processing and verification of request and response.
  * It only delegates the actual message exchange to the derived class. For the
  * messages, it uses the PSR-7 implementation from Guzzle.
- *
- * This is an implementation of the Template Method Patttern
+ * This is an implementation of the Template Method Pattern
  * (https://en.wikipedia.org/wiki/Template_method_pattern).
  */
 abstract class AbstractRequester
 {
+    protected ?Schema $schema = null;
+    protected int $statusExpected = 200;
     /**
-     * @var Schema
+     * @var array
      */
-    protected $schema = null;
-
-    protected $statusExpected = 200;
-    protected $assertHeader = [];
-    protected $assertBody = [];
-
+    protected array $assertHeader = [];
     /**
-     * @var RequestInterface
+     * @var array
      */
-    protected $psr7Request;
+    protected array $assertBody = [];
+    protected RequestInterface $psr7Request;
 
     /**
      * AbstractRequester constructor.
@@ -47,20 +45,21 @@ abstract class AbstractRequester
 
     /**
      * abstract function to be implemented by derived classes
-     *
      * This function must be implemented by derived classes. It should process
      * the given request and return an according response.
      *
      * @param RequestInterface $request
+     *
      * @return ResponseInterface
      */
-    abstract protected function handleRequest(RequestInterface $request);
+    abstract protected function handleRequest(RequestInterface $request): ResponseInterface;
 
     /**
      * @param Schema $schema
-     * @return $this
+     *
+     * @return AbstractRequester
      */
-    public function withSchema($schema)
+    public function withSchema(Schema $schema): AbstractRequester
     {
         $this->schema = $schema;
 
@@ -70,16 +69,17 @@ abstract class AbstractRequester
     /**
      * @return bool
      */
-    public function hasSchema()
+    public function hasSchema(): bool
     {
         return !empty($this->schema);
     }
 
     /**
      * @param string $method
-     * @return $this
+     *
+     * @return AbstractRequester
      */
-    public function withMethod($method)
+    public function withMethod(string $method): AbstractRequester
     {
         $this->psr7Request = $this->psr7Request->withMethod($method);
 
@@ -88,9 +88,10 @@ abstract class AbstractRequester
 
     /**
      * @param string $path
-     * @return $this
+     *
+     * @return AbstractRequester
      */
-    public function withPath($path)
+    public function withPath(string $path): AbstractRequester
     {
         $uri = $this->psr7Request->getUri()->withPath($path);
         $this->psr7Request = $this->psr7Request->withUri($uri);
@@ -100,11 +101,12 @@ abstract class AbstractRequester
 
     /**
      * @param array $requestHeader
-     * @return $this
+     *
+     * @return AbstractRequester
      */
-    public function withRequestHeader($requestHeader)
+    public function withRequestHeader(array $requestHeader): AbstractRequester
     {
-        foreach ((array)$requestHeader as $name => $value) {
+        foreach ($requestHeader as $name => $value) {
             $this->psr7Request = $this->psr7Request->withHeader($name, $value);
         }
 
@@ -112,16 +114,18 @@ abstract class AbstractRequester
     }
 
     /**
-     * @param array $query
-     * @return $this
+     * @param array|null $query
+     *
+     * @return AbstractRequester
      */
-    public function withQuery($query = null)
+    public function withQuery(?array $query = null): AbstractRequester
     {
         $uri = $this->psr7Request->getUri();
 
         if (is_null($query)) {
-            $uri = $uri->withQuery(null);
+            $uri = $uri->withQuery('');
             $this->psr7Request = $this->psr7Request->withUri($uri);
+
             return $this;
         }
 
@@ -136,41 +140,64 @@ abstract class AbstractRequester
 
     /**
      * @param mixed $requestBody
-     * @return $this
+     *
+     * @return AbstractRequester
+     * @throws JsonException
      */
-    public function withRequestBody($requestBody)
+    public function withRequestBody($requestBody): AbstractRequester
     {
-        $contentType = $this->psr7Request->getHeaderLine("Content-Type");
-        if (is_array($requestBody) && (empty($contentType) || strpos($contentType, "application/json") !== false)) {
-            $requestBody = json_encode($requestBody);
+        $contentType = $this->psr7Request->getHeaderLine('Content-Type');
+        if (is_array($requestBody) && (empty($contentType) || strpos($contentType, 'application/json') !== false)) {
+            $requestBody = json_encode($requestBody, JSON_THROW_ON_ERROR);
         }
-        $this->psr7Request = $this->psr7Request->withBody(\GuzzleHttp\Psr7\Utils::streamFor($requestBody));
+        $this->psr7Request = $this->psr7Request->withBody(Utils::streamFor($requestBody));
 
         return $this;
     }
 
-    public function withPsr7Request(RequestInterface $requestInterface)
+    /**
+     * @param RequestInterface $requestInterface
+     *
+     * @return AbstractRequester
+     */
+    public function withPsr7Request(RequestInterface $requestInterface): AbstractRequester
     {
-        $this->psr7Request = $requestInterface->withHeader("Accept", "application/json");
+        $this->psr7Request = $requestInterface->withHeader('Accept', 'application/json');
 
         return $this;
     }
 
-    public function assertResponseCode($code)
+    /**
+     * @param int $code
+     *
+     * @return AbstractRequester
+     */
+    public function assertResponseCode(int $code): AbstractRequester
     {
         $this->statusExpected = $code;
 
         return $this;
     }
 
-    public function assertHeaderContains($header, $contains)
+    /**
+     * @param string $header
+     * @param mixed  $contains
+     *
+     * @return AbstractRequester
+     */
+    public function assertHeaderContains(string $header, $contains): AbstractRequester
     {
         $this->assertHeader[$header] = $contains;
 
         return $this;
     }
 
-    public function assertBodyContains($contains)
+    /**
+     * @param mixed $contains
+     *
+     * @return AbstractRequester
+     */
+    public function assertBodyContains($contains): AbstractRequester
     {
         $this->assertBody[] = $contains;
 
@@ -187,8 +214,9 @@ abstract class AbstractRequester
      * @throws NotMatchedException
      * @throws StatusCodeNotMatchedException
      * @throws InvalidRequestException
+     * @throws JsonException
      */
-    public function send()
+    public function send(): ResponseInterface
     {
         // Process URI based on the OpenAPI schema
         $uriSchema = new Uri($this->schema->getServerUrl());
@@ -202,12 +230,12 @@ abstract class AbstractRequester
         }
 
         $uri = $this->psr7Request->getUri()
-            ->withScheme($uriSchema->getScheme())
-            ->withHost($uriSchema->getHost())
-            ->withPort($uriSchema->getPort())
-            ->withPath($uriSchema->getPath() . $this->psr7Request->getUri()->getPath());
+                                 ->withScheme($uriSchema->getScheme())
+                                 ->withHost($uriSchema->getHost())
+                                 ->withPort($uriSchema->getPort())
+                                 ->withPath($uriSchema->getPath() . $this->psr7Request->getUri()->getPath());
 
-        if (!preg_match("~^{$this->schema->getBasePath()}~",  $uri->getPath())) {
+        if (!preg_match("~^{$this->schema->getBasePath()}~", $uri->getPath())) {
             $uri = $uri->withPath($this->schema->getBasePath() . $uri->getPath());
         }
 
@@ -215,16 +243,20 @@ abstract class AbstractRequester
 
         // Prepare Body to Match Against Specification
         $requestBody = $this->psr7Request->getBody();
-        if (!empty($requestBody)) {
+        if ($requestBody !== null) {
             $requestBody = $requestBody->getContents();
 
-            $contentType = $this->psr7Request->getHeaderLine("content-type");
-            if (empty($contentType) || strpos($contentType, "application/json") !== false) {
-                $requestBody = json_decode($requestBody, true);
-            } elseif (strpos($contentType, "multipart/") !== false) {
+            $contentType = $this->psr7Request->getHeaderLine('content-type');
+            if (empty($contentType) || strpos($contentType, 'application/json') !== false) {
+                if ($requestBody === '') {
+                    $requestBody = [];
+                } else {
+                    $requestBody = json_decode($requestBody, true, 512, JSON_THROW_ON_ERROR);
+                }
+            } elseif (strpos($contentType, 'multipart/') !== false) {
                 $requestBody = $this->parseMultiPartForm($contentType, $requestBody);
             } else {
-                throw new InvalidRequestException("Cannot handle Content Type '{$contentType}'");
+                throw new InvalidRequestException("Cannot handle Content Type '$contentType'");
             }
         }
 
@@ -235,14 +267,18 @@ abstract class AbstractRequester
         // Handle Request
         $response = $this->handleRequest($this->psr7Request);
         $responseHeader = $response->getHeaders();
-        $responseBodyStr = (string) $response->getBody();
-        $responseBody = json_decode($responseBodyStr, true);
+        $responseBodyStr = (string)$response->getBody();
+        if ($responseBodyStr === '') {
+            $responseBody = [];
+        } else {
+            $responseBody = json_decode($responseBodyStr, true, 512, JSON_THROW_ON_ERROR);
+        }
         $statusReturned = $response->getStatusCode();
 
         // Assert results
-        if ($this->statusExpected != $statusReturned) {
+        if ($this->statusExpected !== $statusReturned) {
             throw new StatusCodeNotMatchedException(
-                "Status code not matched: Expected {$this->statusExpected}, got {$statusReturned}",
+                "Status code not matched: Expected '$this->statusExpected', got '$statusReturned'",
                 $responseBody
             );
         }
@@ -257,7 +293,7 @@ abstract class AbstractRequester
         foreach ($this->assertHeader as $key => $value) {
             if (!isset($responseHeader[$key]) || strpos($responseHeader[$key][0], $value) === false) {
                 throw new NotMatchedException(
-                    "Does not exists header '$key' with value '$value'",
+                    "Header '$key' does not contain value '$value'",
                     $responseHeader
                 );
             }
@@ -266,7 +302,7 @@ abstract class AbstractRequester
         if (!empty($responseBodyStr)) {
             foreach ($this->assertBody as $item) {
                 if (strpos($responseBodyStr, $item) === false) {
-                    throw new NotMatchedException("Body does not contain '{$item}'");
+                    throw new NotMatchedException("Body does not contain '$item'");
                 }
             }
         }
@@ -275,16 +311,16 @@ abstract class AbstractRequester
     }
 
     /**
-     * @param $contentType
-     * @param $body
+     * @param string $contentType
+     * @param mixed  $body
      *
      * @return array|null
      */
-    protected function parseMultiPartForm($contentType, $body)
+    protected function parseMultiPartForm(string $contentType, $body): ?array
     {
         $matchRequest = [];
 
-        if (empty($contentType) || strpos($contentType, "multipart/") === false) {
+        if ($contentType === '' || strpos($contentType, 'multipart/') === false) {
             return null;
         }
 

@@ -2,538 +2,580 @@
 
 namespace Test;
 
+use ByJG\ApiTools\Base\Schema;
+use ByJG\ApiTools\Exception\DefinitionNotFoundException;
+use ByJG\ApiTools\Exception\HttpMethodNotFoundException;
+use ByJG\ApiTools\Exception\InvalidDefinitionException;
+use ByJG\ApiTools\Exception\NotMatchedException;
+use ByJG\ApiTools\Exception\PathNotFoundException;
 use ByJG\ApiTools\Swagger\SwaggerSchema;
+use JsonException;
 use PHPUnit\Framework\TestCase;
 
 class SwaggerSchemaTest extends TestCase
 {
     /**
-     * @var SwaggerSchema
+     * @var SwaggerSchema|null
      */
-    protected $object;
+    protected ?SwaggerSchema $schema = null;
 
-    public function setUp(): void 
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function setUp(): void
     {
-        $this->object = \ByJG\ApiTools\Base\Schema::getInstance(file_get_contents(__DIR__ . '/example/swagger.json'));
-    }
+        /** @var SwaggerSchema $schema */
+        $schema = Schema::getInstance(file_get_contents(__DIR__ . '/example/swagger.json'));
 
-    public function tearDown(): void 
-    {
-        $this->object = null;
-    }
-
-    public function testGetBasePath()
-    {
-        $this->assertEquals('/v2', $this->object->getBasePath());
+        $this->schema = $schema;
     }
 
     /**
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
      */
-    public function testGetPathDirectMatch()
+    public function tearDown(): void
+    {
+        $this->schema = null;
+    }
+
+    /**
+     * @return void
+     */
+    public function testGetBasePath(): void
+    {
+        $this->assertEquals('/v2', $this->schema->getBasePath());
+    }
+
+    /**
+     * @return void
+     * @throws HttpMethodNotFoundException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
+     */
+    public function testGetPathDirectMatch(): void
     {
         $this->assertEquals(
             [
-                "tags"        => [
-                    "pet",
+                'tags'        => [
+                    'pet',
                 ],
-                "summary"     => "Add a new pet to the store",
-                "description" => "",
-                "operationId" => "addPet",
-                "consumes"    => [
-                    "application/json",
-                    "application/xml",
+                'summary'     => 'Add a new pet to the store',
+                'description' => '',
+                'operationId' => 'addPet',
+                'consumes'    => [
+                    'application/json',
+                    'application/xml',
                 ],
-                "produces"    => [
-                    "application/xml",
-                    "application/json",
+                'produces'    => [
+                    'application/xml',
+                    'application/json',
                 ],
-                "parameters"  => [
+                'parameters'  => [
                     [
-                        "in"          => "body",
-                        "name"        => "body",
-                        "description" => "Pet object that needs to be added to the store",
-                        "required"    => true,
-                        "schema"      => [
-                            "\$ref" => "#/definitions/Pet",
+                        'in'          => 'body',
+                        'name'        => 'body',
+                        'description' => 'Pet object that needs to be added to the store',
+                        'required'    => true,
+                        'schema'      => [
+                            '$ref' => '#/definitions/Pet',
                         ],
                     ],
                 ],
-                "responses"   => [
-                    "405" => [
-                        "description" => "Invalid input",
+                'responses'   => [
+                    '405' => [
+                        'description' => 'Invalid input',
                     ],
                 ],
-                "security"    => [
+                'security'    => [
                     [
-                        "petstore_auth" => [
-                            "write:pets",
-                            "read:pets",
+                        'petstore_auth' => [
+                            'write:pets',
+                            'read:pets',
                         ],
                     ],
                 ],
             ],
-            $this->object->getPathDefinition('/v2/pet', 'post')
+            $this->schema->getPathDefinition('/v2/pet', 'post')
         );
         $this->assertEquals(
             [
-                "tags"        => [
-                    "pet",
+                'tags'        => [
+                    'pet',
                 ],
-                "summary"     => "Update an existing pet",
-                "description" => "",
-                "operationId" => "updatePet",
-                "consumes"    => [
-                    "application/json",
-                    "application/xml",
+                'summary'     => 'Update an existing pet',
+                'description' => '',
+                'operationId' => 'updatePet',
+                'consumes'    => [
+                    'application/json',
+                    'application/xml',
                 ],
-                "produces"    => [
-                    "application/xml",
-                    "application/json",
+                'produces'    => [
+                    'application/xml',
+                    'application/json',
                 ],
-                "parameters"  => [
+                'parameters'  => [
                     [
-                        "in"          => "body",
-                        "name"        => "body",
-                        "description" => "Pet object that needs to be added to the store",
-                        "required"    => true,
-                        "schema"      => [
-                            "\$ref" => "#/definitions/Pet",
+                        'in'          => 'body',
+                        'name'        => 'body',
+                        'description' => 'Pet object that needs to be added to the store',
+                        'required'    => true,
+                        'schema'      => [
+                            '$ref' => '#/definitions/Pet',
                         ],
                     ],
                 ],
-                "responses"   => [
-                    "400" => [
-                        "description" => "Invalid ID supplied",
+                'responses'   => [
+                    '400' => [
+                        'description' => 'Invalid ID supplied',
                     ],
-                    "404" => [
-                        "description" => "Pet not found",
+                    '404' => [
+                        'description' => 'Pet not found',
                     ],
-                    "405" => [
-                        "description" => "Validation exception",
+                    '405' => [
+                        'description' => 'Validation exception',
                     ],
                 ],
-                "security"    => [
+                'security'    => [
                     [
-                        "petstore_auth" => [
-                            "write:pets",
-                            "read:pets",
+                        'petstore_auth' => [
+                            'write:pets',
+                            'read:pets',
                         ],
                     ],
                 ],
             ],
-            $this->object->getPathDefinition('/v2/pet', 'put')
+            $this->schema->getPathDefinition('/v2/pet', 'put')
         );
     }
 
     /**
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetPathPatternMatch()
+    public function testGetPathPatternMatch(): void
     {
         $this->assertEquals(
             [
-                "tags"        => [
-                    "pet",
+                'tags'        => [
+                    'pet',
                 ],
-                "summary"     => "Find pet by ID",
-                "description" => "Returns a single pet",
-                "operationId" => "getPetById",
-                "produces"    => [
-                    "application/xml",
-                    "application/json",
+                'summary'     => 'Find pet by ID',
+                'description' => 'Returns a single pet',
+                'operationId' => 'getPetById',
+                'produces'    => [
+                    'application/xml',
+                    'application/json',
                 ],
-                "parameters"  => [
+                'parameters'  => [
                     [
-                        "name"        => "petId",
-                        "in"          => "path",
-                        "description" => "ID of pet to return",
-                        "required"    => true,
-                        "type"        => "integer",
-                        "format"      => "int64",
+                        'name'        => 'petId',
+                        'in'          => 'path',
+                        'description' => 'ID of pet to return',
+                        'required'    => true,
+                        'type'        => 'integer',
+                        'format'      => 'int64',
                     ],
                 ],
-                "responses"   => [
-                    "200" => [
-                        "description" => "successful operation",
-                        "schema"      => [
-                            "\$ref" => "#/definitions/Pet",
+                'responses'   => [
+                    '200' => [
+                        'description' => 'successful operation',
+                        'schema'      => [
+                            '$ref' => '#/definitions/Pet',
                         ],
                     ],
-                    "400" => [
-                        "description" => "Invalid ID supplied",
+                    '400' => [
+                        'description' => 'Invalid ID supplied',
                     ],
-                    "404" => [
-                        "description" => "Pet not found",
+                    '404' => [
+                        'description' => 'Pet not found',
                     ],
                 ],
-                "security"    => [
+                'security'    => [
                     [
-                        "api_key" => [],
+                        'api_key' => [],
                     ],
                 ],
             ],
-            $this->object->getPathDefinition('/v2/pet/10', 'get')
+            $this->schema->getPathDefinition('/v2/pet/10', 'get')
         );
         $this->assertEquals(
             [
-                "tags"        => [
-                    "pet",
+                'tags'        => [
+                    'pet',
                 ],
-                "summary"     => "Updates a pet in the store with form data",
-                "description" => "",
-                "operationId" => "updatePetWithForm",
-                "consumes"    => [
-                    "application/x-www-form-urlencoded",
+                'summary'     => 'Updates a pet in the store with form data',
+                'description' => '',
+                'operationId' => 'updatePetWithForm',
+                'consumes'    => [
+                    'application/x-www-form-urlencoded',
                 ],
-                "produces"    => [
-                    "application/xml",
-                    "application/json",
+                'produces'    => [
+                    'application/xml',
+                    'application/json',
                 ],
-                "parameters"  => [
+                'parameters'  => [
                     [
-                        "name"        => "petId",
-                        "in"          => "path",
-                        "description" => "ID of pet that needs to be updated",
-                        "required"    => true,
-                        "type"        => "integer",
-                        "format"      => "int64",
-                    ],
-                    [
-                        "name"        => "name",
-                        "in"          => "formData",
-                        "description" => "Updated name of the pet",
-                        "required"    => false,
-                        "type"        => "string",
+                        'name'        => 'petId',
+                        'in'          => 'path',
+                        'description' => 'ID of pet that needs to be updated',
+                        'required'    => true,
+                        'type'        => 'integer',
+                        'format'      => 'int64',
                     ],
                     [
-                        "name"        => "status",
-                        "in"          => "formData",
-                        "description" => "Updated status of the pet",
-                        "required"    => false,
-                        "type"        => "string",
-                    ],
-                ],
-                "responses"   => [
-                    "405" => [
-                        "description" => "Invalid input",
-                    ],
-                ],
-                "security"    => [
-                    [
-                        "petstore_auth" => [
-                            "write:pets",
-                            "read:pets",
-                        ],
-                    ],
-                ],
-            ],
-            $this->object->getPathDefinition('/v2/pet/10', 'post')
-        );
-        $this->assertEquals(
-            [
-                "tags"        => [
-                    "pet",
-                ],
-                "summary"     => "Deletes a pet",
-                "description" => "",
-                "operationId" => "deletePet",
-                "produces"    => [
-                    "application/xml",
-                    "application/json",
-                ],
-                "parameters"  => [
-                    [
-                        "name"     => "api_key",
-                        "in"       => "header",
-                        "required" => false,
-                        "type"     => "string",
+                        'name'        => 'name',
+                        'in'          => 'formData',
+                        'description' => 'Updated name of the pet',
+                        'required'    => false,
+                        'type'        => 'string',
                     ],
                     [
-                        "name"        => "petId",
-                        "in"          => "path",
-                        "description" => "Pet id to delete",
-                        "required"    => true,
-                        "type"        => "integer",
-                        "format"      => "int64",
+                        'name'        => 'status',
+                        'in'          => 'formData',
+                        'description' => 'Updated status of the pet',
+                        'required'    => false,
+                        'type'        => 'string',
                     ],
                 ],
-                "responses"   => [
-                    "400" => [
-                        "description" => "Invalid ID supplied",
-                    ],
-                    "404" => [
-                        "description" => "Pet not found",
+                'responses'   => [
+                    '405' => [
+                        'description' => 'Invalid input',
                     ],
                 ],
-                "security"    => [
+                'security'    => [
                     [
-                        "petstore_auth" => [
-                            "write:pets",
-                            "read:pets",
+                        'petstore_auth' => [
+                            'write:pets',
+                            'read:pets',
                         ],
                     ],
                 ],
             ],
-            $this->object->getPathDefinition('/v2/pet/10', 'delete')
+            $this->schema->getPathDefinition('/v2/pet/10', 'post')
         );
-    }
-
-    /**
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
-     */
-    public function testGetPathPatternMatch2()
-    {
         $this->assertEquals(
             [
-                "tags"        => [
-                    "pet",
+                'tags'        => [
+                    'pet',
                 ],
-                "summary"     => "uploads an image",
-                "description" => "",
-                "operationId" => "uploadFile",
-                "consumes"    => [
-                    "multipart/form-data",
+                'summary'     => 'Deletes a pet',
+                'description' => '',
+                'operationId' => 'deletePet',
+                'produces'    => [
+                    'application/xml',
+                    'application/json',
                 ],
-                "produces"    => [
-                    "application/json",
-                ],
-                "parameters"  => [
+                'parameters'  => [
                     [
-                        "name"        => "petId",
-                        "in"          => "path",
-                        "description" => "ID of pet to update",
-                        "required"    => true,
-                        "type"        => "integer",
-                        "format"      => "int64",
+                        'name'     => 'api_key',
+                        'in'       => 'header',
+                        'required' => false,
+                        'type'     => 'string',
                     ],
                     [
-                        "name"        => "additionalMetadata",
-                        "in"          => "formData",
-                        "description" => "Additional data to pass to server",
-                        "required"    => false,
-                        "type"        => "string",
-                    ],
-                    [
-                        "name"        => "file",
-                        "in"          => "formData",
-                        "description" => "file to upload",
-                        "required"    => false,
-                        "type"        => "file",
+                        'name'        => 'petId',
+                        'in'          => 'path',
+                        'description' => 'Pet id to delete',
+                        'required'    => true,
+                        'type'        => 'integer',
+                        'format'      => 'int64',
                     ],
                 ],
-                "responses"   => [
-                    "200" => [
-                        "description" => "successful operation",
-                        "schema"      => [
-                            "\$ref" => "#/definitions/ApiResponse",
-                        ],
+                'responses'   => [
+                    '400' => [
+                        'description' => 'Invalid ID supplied',
+                    ],
+                    '404' => [
+                        'description' => 'Pet not found',
                     ],
                 ],
-                "security"    => [
+                'security'    => [
                     [
-                        "petstore_auth" => [
-                            "write:pets",
-                            "read:pets",
+                        'petstore_auth' => [
+                            'write:pets',
+                            'read:pets',
                         ],
                     ],
                 ],
             ],
-            $this->object->getPathDefinition('/v2/pet/10/uploadImage', 'post')
+            $this->schema->getPathDefinition('/v2/pet/10', 'delete')
         );
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetPathFail()
+    public function testGetPathPatternMatch2(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\PathNotFoundException::class);
-
-        $this->object->getPathDefinition('/v2/pets', 'get');
-    }
-
-    /**
-     *
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
-     */
-    public function testPathExistsButMethodDont()
-    {
-        $this->expectException(\ByJG\ApiTools\Exception\HttpMethodNotFoundException::class);
-
-        $this->object->getPathDefinition('/v2/pet', 'GET');
-    }
-
-    /**
-     * @throws \ByJG\ApiTools\Exception\HttpMethodNotFoundException
-     * @throws \ByJG\ApiTools\Exception\NotMatchedException
-     * @throws \ByJG\ApiTools\Exception\PathNotFoundException
-     */
-    public function testGetPathStructure()
-    {
-        $pathDefintion = $this->object->getPathDefinition('/v2/pet', 'PUT');
-
         $this->assertEquals(
             [
-                "tags"        => [
-                    "pet",
+                'tags'        => [
+                    'pet',
                 ],
-                "summary"     => "Update an existing pet",
-                "description" => "",
-                "operationId" => "updatePet",
-                "consumes"    => [
-                    "application/json",
-                    "application/xml",
+                'summary'     => 'uploads an image',
+                'description' => '',
+                'operationId' => 'uploadFile',
+                'consumes'    => [
+                    'multipart/form-data',
                 ],
-                "produces"    => [
-                    "application/xml",
-                    "application/json",
+                'produces'    => [
+                    'application/json',
                 ],
-                "parameters"  => [
+                'parameters'  => [
                     [
-                        "in"          => "body",
-                        "name"        => "body",
-                        "description" => "Pet object that needs to be added to the store",
-                        "required"    => true,
-                        "schema"      => [
-                            "\$ref" => "#/definitions/Pet",
+                        'name'        => 'petId',
+                        'in'          => 'path',
+                        'description' => 'ID of pet to update',
+                        'required'    => true,
+                        'type'        => 'integer',
+                        'format'      => 'int64',
+                    ],
+                    [
+                        'name'        => 'additionalMetadata',
+                        'in'          => 'formData',
+                        'description' => 'Additional data to pass to server',
+                        'required'    => false,
+                        'type'        => 'string',
+                    ],
+                    [
+                        'name'        => 'file',
+                        'in'          => 'formData',
+                        'description' => 'file to upload',
+                        'required'    => false,
+                        'type'        => 'file',
+                    ],
+                ],
+                'responses'   => [
+                    '200' => [
+                        'description' => 'successful operation',
+                        'schema'      => [
+                            '$ref' => '#/definitions/ApiResponse',
                         ],
                     ],
                 ],
-                "responses"   => [
-                    "400" => [
-                        "description" => "Invalid ID supplied",
-                    ],
-                    "404" => [
-                        "description" => "Pet not found",
-                    ],
-                    "405" => [
-                        "description" => "Validation exception",
-                    ],
-                ],
-                "security"    => [
+                'security'    => [
                     [
-                        "petstore_auth" => [
-                            "write:pets",
-                            "read:pets",
+                        'petstore_auth' => [
+                            'write:pets',
+                            'read:pets',
                         ],
                     ],
                 ],
             ],
-            $pathDefintion
+            $this->schema->getPathDefinition('/v2/pet/10/uploadImage', 'post')
         );
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetDefinitionFailed()
+    public function testGetPathFail(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\InvalidDefinitionException::class);
+        $this->expectException(PathNotFoundException::class);
 
-        $this->object->getDefinition('Order');
+        $this->schema->getPathDefinition('/v2/pets', 'get');
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetDefinitionFailed2()
+    public function testPathExistsButMethodDont(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\InvalidDefinitionException::class);
+        $this->expectException(HttpMethodNotFoundException::class);
 
-        $this->object->getDefinition('1/2/Order');
+        $this->schema->getPathDefinition('/v2/pet', 'GET');
     }
 
     /**
-     *
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws HttpMethodNotFoundException
+     * @throws InvalidDefinitionException
+     * @throws NotMatchedException
+     * @throws PathNotFoundException
      */
-    public function testGetDefinitionFailed3()
+    public function testGetPathStructure(): void
     {
-        $this->expectException(\ByJG\ApiTools\Exception\DefinitionNotFoundException::class);
-
-        $this->object->getDefinition('#/definitions/OrderNOtFound');
-    }
-
-    /**
-     * @throws \ByJG\ApiTools\Exception\DefinitionNotFoundException
-     * @throws \ByJG\ApiTools\Exception\InvalidDefinitionException
-     */
-    public function testGetDefinition()
-    {
-        $order = $this->object->getDefinition('#/definitions/Order');
+        $pathDefinition = $this->schema->getPathDefinition('/v2/pet', 'PUT');
 
         $this->assertEquals(
             [
-                "type"       => "object",
-                "additionalProperties" => false,
-                "properties" => [
-                    "id"       => [
-                        "type"   => "integer",
-                        "format" => "int64",
-                    ],
-                    "petId"    => [
-                        "type"   => "integer",
-                        "format" => "int64",
-                    ],
-                    "quantity" => [
-                        "type"   => "integer",
-                        "format" => "int32",
-                    ],
-                    "shipDate" => [
-                        "type"   => "string",
-                        "format" => "date-time",
-                    ],
-                    "status"   => [
-                        "type"        => "string",
-                        "description" => "Order Status",
-                        "enum"        => [
-                            "placed",
-                            "approved",
-                            "delivered",
+                'tags'        => [
+                    'pet',
+                ],
+                'summary'     => 'Update an existing pet',
+                'description' => '',
+                'operationId' => 'updatePet',
+                'consumes'    => [
+                    'application/json',
+                    'application/xml',
+                ],
+                'produces'    => [
+                    'application/xml',
+                    'application/json',
+                ],
+                'parameters'  => [
+                    [
+                        'in'          => 'body',
+                        'name'        => 'body',
+                        'description' => 'Pet object that needs to be added to the store',
+                        'required'    => true,
+                        'schema'      => [
+                            '$ref' => '#/definitions/Pet',
                         ],
                     ],
-                    "complete" => [
-                        "type"    => "boolean",
-                        "default" => false,
+                ],
+                'responses'   => [
+                    '400' => [
+                        'description' => 'Invalid ID supplied',
+                    ],
+                    '404' => [
+                        'description' => 'Pet not found',
+                    ],
+                    '405' => [
+                        'description' => 'Validation exception',
                     ],
                 ],
-                "xml"        => [
-                    "name" => "Order",
+                'security'    => [
+                    [
+                        'petstore_auth' => [
+                            'write:pets',
+                            'read:pets',
+                        ],
+                    ],
+                ],
+            ],
+            $pathDefinition
+        );
+    }
+
+    /**
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
+     */
+    public function testGetDefinitionFailed(): void
+    {
+        $this->expectException(InvalidDefinitionException::class);
+
+        $this->schema->getDefinition('Order');
+    }
+
+    /**
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
+     */
+    public function testGetDefinitionFailed2(): void
+    {
+        $this->expectException(InvalidDefinitionException::class);
+
+        $this->schema->getDefinition('1/2/Order');
+    }
+
+    /**
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
+     */
+    public function testGetDefinitionFailed3(): void
+    {
+        $this->expectException(DefinitionNotFoundException::class);
+
+        $this->schema->getDefinition('#/definitions/OrderNOtFound');
+    }
+
+    /**
+     * @return void
+     * @throws DefinitionNotFoundException
+     * @throws InvalidDefinitionException
+     */
+    public function testGetDefinition(): void
+    {
+        $order = $this->schema->getDefinition('#/definitions/Order');
+
+        $this->assertEquals(
+            [
+                'type'                 => 'object',
+                'additionalProperties' => false,
+                'properties'           => [
+                    'id'       => [
+                        'type'   => 'integer',
+                        'format' => 'int64',
+                    ],
+                    'petId'    => [
+                        'type'   => 'integer',
+                        'format' => 'int64',
+                    ],
+                    'quantity' => [
+                        'type'   => 'integer',
+                        'format' => 'int32',
+                    ],
+                    'shipDate' => [
+                        'type'   => 'string',
+                        'format' => 'date-time',
+                    ],
+                    'status'   => [
+                        'type'        => 'string',
+                        'description' => 'Order Status',
+                        'enum'        => [
+                            'placed',
+                            'approved',
+                            'delivered',
+                        ],
+                    ],
+                    'complete' => [
+                        'type'    => 'boolean',
+                        'default' => false,
+                    ],
+                ],
+                'xml'                  => [
+                    'name' => 'Order',
                 ],
             ],
             $order
         );
     }
 
-    public function testItNotAllowsNullValuesByDefault()
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function testItNotAllowsNullValuesByDefault(): void
     {
-        $schema = \ByJG\ApiTools\Base\Schema::getInstance('{"swagger": "2.0"}');
+        $schema = Schema::getInstance('{"swagger": "2.0"}');
         $this->assertFalse($schema->isAllowNullValues());
     }
 
-    public function testItAllowsNullValues()
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function testItAllowsNullValues(): void
     {
-        $allowNullValues = true;
-        $schema = \ByJG\ApiTools\Base\Schema::getInstance('{"swagger": "2.0"}', $allowNullValues);
+        $schema = Schema::getInstance('{"swagger": "2.0"}', true);
         $this->assertTrue($schema->isAllowNullValues());
     }
 }

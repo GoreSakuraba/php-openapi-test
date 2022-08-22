@@ -101,7 +101,7 @@
         }
       }
     },
-    "/inventory" : {
+    "/inventory": {
       "post": {
         "tags": [
           "admins"

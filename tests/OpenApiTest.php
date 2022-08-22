@@ -1,17 +1,19 @@
 <?php
 
-
 namespace Test;
 
 use ByJG\ApiTools\Base\Schema;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use JsonException;
 
-require_once "AbstractRequesterTest.php";
+require_once 'AbstractRequesterTest.php';
 
 class OpenApiTest extends AbstractRequesterTest
 {
-    public function setUp(): void 
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function setUp(): void
     {
         $schema = Schema::getInstance(file_get_contents(__DIR__ . '/rest/openapi.json'));
         $this->setSchema($schema);

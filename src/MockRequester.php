@@ -1,9 +1,9 @@
 <?php
 
-
 namespace ByJG\ApiTools;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\RequestOptions;
@@ -15,10 +15,11 @@ class MockRequester extends AbstractRequester
     /**
      * @var Client
      */
-    private $httpClient;
+    private Client $httpClient;
 
     /**
      * MockAbstractRequest constructor.
+     *
      * @param ResponseInterface $expectedResponse
      */
     public function __construct(ResponseInterface $expectedResponse)
@@ -34,11 +35,11 @@ class MockRequester extends AbstractRequester
      * @param RequestInterface $request
      *
      * @return ResponseInterface
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
-    protected function handleRequest(RequestInterface $request)
+    protected function handleRequest(RequestInterface $request): ResponseInterface
     {
-        $request = $request->withHeader("User-Agent", "ByJG Swagger Test");
+        $request = $request->withHeader('User-Agent', 'ByJG Swagger Test');
 
         return $this->httpClient->send($request, [
             RequestOptions::SYNCHRONOUS     => true,

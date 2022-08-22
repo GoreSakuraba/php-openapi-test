@@ -12,41 +12,46 @@ use ByJG\ApiTools\OpenApi\OpenApiSchema;
 use ByJG\ApiTools\Swagger\SwaggerSchema;
 use GuzzleHttp\Psr7\Uri;
 use InvalidArgumentException;
+use JsonException;
 
 abstract class Schema
 {
-    protected $jsonFile;
-    protected $allowNullValues = false;
-    protected $specificationVersion;
-
-    const SWAGGER_PATHS = "paths";
-    const SWAGGER_PARAMETERS = "parameters";
-    const SWAGGER_COMPONENTS = "components";
+    /**
+     * @var array
+     */
+    protected array $jsonFile;
+    protected bool $allowNullValues = false;
+    protected string $specificationVersion;
+    protected const SWAGGER_PATHS = 'paths';
+    protected const SWAGGER_PARAMETERS = 'parameters';
+    protected const SWAGGER_COMPONENTS = 'components';
 
     /**
      * Returns the major specification version
+     *
      * @return string
      */
-    public function getSpecificationVersion()
+    public function getSpecificationVersion(): string
     {
         return $this->specificationVersion;
     }
 
     /**
      * Factory function for schemata.
-     *
      * Initialize with schema data, which can be a PHP array or encoded as JSON.
      * This determines the type of the schema from the given data.
      *
      * @param array|string $data
-     * @param bool $extraArgs
+     * @param bool         $extraArgs
+     *
      * @return Schema
+     * @throws JsonException
      */
-    public static function getInstance($data, $extraArgs = false)
+    public static function getInstance($data, bool $extraArgs = false): Schema
     {
         // when given a string, decode from JSON
         if (is_string($data)) {
-            $data = json_decode($data, true);
+            $data = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
         }
         // make sure we got an array
         if (!is_array($data)) {
@@ -66,6 +71,7 @@ abstract class Schema
     /**
      * @param string $path
      * @param string $method
+     *
      * @return mixed
      * @throws DefinitionNotFoundException
      * @throws HttpMethodNotFoundException
@@ -73,7 +79,7 @@ abstract class Schema
      * @throws NotMatchedException
      * @throws PathNotFoundException
      */
-    public function getPathDefinition($path, $method)
+    public function getPathDefinition(string $path, string $method)
     {
         $method = strtolower($method);
 
@@ -121,13 +127,14 @@ abstract class Schema
             }
         }
 
-        throw new PathNotFoundException('Path "' . $path . '" not found');
+        throw new PathNotFoundException("Path '$path' not found");
     }
 
     /**
      * @param string $path
      * @param string $method
-     * @param string $status
+     * @param int    $status
+     *
      * @return Body
      * @throws DefinitionNotFoundException
      * @throws HttpMethodNotFoundException
@@ -136,19 +143,19 @@ abstract class Schema
      * @throws PathNotFoundException
      * @throws GenericSwaggerException
      */
-    public function getResponseParameters($path, $method, $status)
+    public function getResponseParameters(string $path, string $method, int $status): Body
     {
         $structure = $this->getPathDefinition($path, $method);
 
-        if (!isset($structure['responses']["200"])) {
-            $structure['responses']["200"] = ["description" => "Auto Generated OK"];
+        if (!isset($structure['responses']['200'])) {
+            $structure['responses']['200'] = ['description' => 'Auto Generated OK'];
         }
 
         $verifyStatus = $status;
         if (!isset($structure['responses'][$verifyStatus])) {
             $verifyStatus = 'default';
             if (!isset($structure['responses'][$verifyStatus])) {
-                throw new InvalidDefinitionException("Could not found status code '$status' in '$path' and '$method'");
+                throw new InvalidDefinitionException("Could not find status code '$status' in '$path' and '$method'");
             }
         }
 
@@ -161,39 +168,48 @@ abstract class Schema
      *
      * @return bool
      */
-    public function isAllowNullValues()
+    public function isAllowNullValues(): bool
     {
         return $this->allowNullValues;
     }
 
+    /**
+     * @return mixed
+     */
     abstract public function getServerUrl();
 
     /**
-     * @param $parameterIn
-     * @param $parameters
-     * @param $arguments
+     * @param mixed $parameterIn
+     * @param array $parameters
+     * @param array $arguments
+     *
      * @throws DefinitionNotFoundException
      * @throws InvalidDefinitionException
      * @throws NotMatchedException
      */
-    abstract protected function validateArguments($parameterIn, $parameters, $arguments);
+    abstract protected function validateArguments($parameterIn, array $parameters, array $arguments);
 
+    /**
+     * @return mixed
+     */
     abstract public function getBasePath();
 
     /**
-     * @param $name
+     * @param string $name
+     *
      * @return mixed
      * @throws DefinitionNotFoundException
      * @throws InvalidDefinitionException
      */
-    abstract public function getDefinition($name);
+    abstract public function getDefinition(string $name);
 
     /**
-     * @param $path
-     * @param $method
+     * @param string $path
+     * @param string $method
+     *
      * @return Body
      * @throws HttpMethodNotFoundException
      * @throws PathNotFoundException
      */
-    abstract public function getRequestParameters($path, $method);
+    abstract public function getRequestParameters(string $path, string $method): Body;
 }

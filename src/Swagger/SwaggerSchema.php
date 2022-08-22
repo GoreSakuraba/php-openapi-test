@@ -9,6 +9,7 @@ use ByJG\ApiTools\Exception\InvalidDefinitionException;
 use ByJG\ApiTools\Exception\NotMatchedException;
 use ByJG\ApiTools\Exception\PathNotFoundException;
 use InvalidArgumentException;
+use JsonException;
 
 class SwaggerSchema extends Schema
 {
@@ -16,59 +17,76 @@ class SwaggerSchema extends Schema
      * Initialize with schema data, which can be a PHP array or encoded as JSON.
      *
      * @param array|string $data
-     * @param bool $allowNullValues
+     * @param bool         $allowNullValues
+     *
+     * @throws JsonException
      */
-    public function __construct($data, $allowNullValues = false)
+    public function __construct($data, bool $allowNullValues = false)
     {
         // when given a string, decode from JSON
         if (is_string($data)) {
-            $data = json_decode($data, true);
+            $data = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
         }
         // make sure we got an array
         if (!is_array($data)) {
             throw new InvalidArgumentException('schema must be given as array or JSON string');
         }
         $this->jsonFile = $data;
-        $this->allowNullValues = (bool) $allowNullValues;
+        $this->allowNullValues = $allowNullValues;
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getHttpSchema()
     {
         return isset($this->jsonFile['schemes']) ? $this->jsonFile['schemes'][0] : '';
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getHost()
     {
-        return isset($this->jsonFile['host']) ? $this->jsonFile['host'] : '';
+        return $this->jsonFile['host'] ?? '';
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getBasePath()
     {
-        return isset($this->jsonFile['basePath']) ? $this->jsonFile['basePath'] : '';
+        return $this->jsonFile['basePath'] ?? '';
     }
 
-    public function getServerUrl()
+    /**
+     * @return string
+     */
+    public function getServerUrl(): string
     {
         $httpSchema = $this->getHttpSchema();
         if (!empty($httpSchema)) {
-            $httpSchema .= "://";
+            $httpSchema .= '://';
         }
         $host = $this->getHost();
         $basePath = $this->getBasePath();
+
         return "$httpSchema$host$basePath";
     }
 
     /**
-     * @param $parameterIn
-     * @param $parameters
-     * @param $arguments
+     * @param mixed $parameterIn
+     * @param array $parameters
+     * @param array $arguments
+     *
+     * @return void
      * @throws NotMatchedException
      */
-    protected function validateArguments($parameterIn, $parameters, $arguments)
+    protected function validateArguments($parameterIn, array $parameters, array $arguments): void
     {
         foreach ($parameters as $parameter) {
             if ($parameter['in'] === $parameterIn
-                && $parameter['type'] === "integer"
+                && $parameter['type'] === 'integer'
                 && filter_var($arguments[$parameter['name']], FILTER_VALIDATE_INT) === false) {
                 throw new NotMatchedException('Path expected an integer value');
             }
@@ -76,12 +94,13 @@ class SwaggerSchema extends Schema
     }
 
     /**
-     * @param $name
+     * @param string $name
+     *
      * @return mixed
      * @throws DefinitionNotFoundException
      * @throws InvalidDefinitionException
      */
-    public function getDefinition($name)
+    public function getDefinition(string $name)
     {
         $nameParts = explode('/', $name);
 
@@ -97,8 +116,9 @@ class SwaggerSchema extends Schema
     }
 
     /**
-     * @param $path
-     * @param $method
+     * @param string $path
+     * @param string $method
+     *
      * @return SwaggerRequestBody
      * @throws DefinitionNotFoundException
      * @throws HttpMethodNotFoundException
@@ -106,13 +126,14 @@ class SwaggerSchema extends Schema
      * @throws NotMatchedException
      * @throws PathNotFoundException
      */
-    public function getRequestParameters($path, $method)
+    public function getRequestParameters(string $path, string $method): SwaggerRequestBody
     {
         $structure = $this->getPathDefinition($path, $method);
 
         if (!isset($structure[self::SWAGGER_PARAMETERS])) {
             return new SwaggerRequestBody($this, "$method $path", []);
         }
+
         return new SwaggerRequestBody($this, "$method $path", $structure[self::SWAGGER_PARAMETERS]);
     }
 
@@ -120,10 +141,14 @@ class SwaggerSchema extends Schema
      * OpenApi 2.0 doesn't describe null values, so this flag defines,
      * if match is ok when one of property
      *
-     * @param $value
+     * @param bool $value
+     *
+     * @return SwaggerSchema
      */
-    public function setAllowNullValues($value)
+    public function setAllowNullValues(bool $value): SwaggerSchema
     {
-        $this->allowNullValues = (bool) $value;
+        $this->allowNullValues = $value;
+
+        return $this;
     }
 }

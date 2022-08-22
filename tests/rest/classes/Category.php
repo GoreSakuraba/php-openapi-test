@@ -2,53 +2,63 @@
 
 namespace Test\Rest\Classes;
 
-class Category implements \JsonSerializable
+use JsonSerializable;
+
+class Category implements JsonSerializable
 {
-    protected $id;
-    protected $name;
+    protected int $id;
+    protected string $name;
 
     /**
      * Category constructor.
-     * @param $id
-     * @param $name
+     *
+     * @param int $id
+     * @param string $name
      */
-    public function __construct($id, $name)
+    public function __construct(int $id, string $name)
     {
         $this->id = $id;
         $this->name = $name;
     }
 
-
     /**
-     * @return mixed
+     * @return int
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * @param mixed $id
+     * @param int $id
+     *
+     * @return Category
      */
-    public function setId($id)
+    public function setId(int $id): Category
     {
         $this->id = $id;
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
+     *
+     * @return Category
      */
-    public function setName($name)
+    public function setName(string $name): Category
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -57,7 +67,7 @@ class Category implements \JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            'id' => $this->getId(),
+            'id'   => $this->getId(),
             'name' => $this->getName(),
         ];
     }

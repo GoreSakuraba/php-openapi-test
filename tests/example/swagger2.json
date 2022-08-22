@@ -19,43 +19,55 @@
     "http"
   ],
   "paths": {
-    "/languages" : {
-      "get" : {
-        "tags" : [ "general" ],
-        "summary" : "Get list of languages details for the specified site",
-        "consumes" : [ "text/plain; charset=utf-8" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "name" : "site",
-          "in" : "query",
-          "description" : "Application context<br />\nExample: 'sl'\n",
-          "required" : true,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "JSON object",
-            "schema" : {
-              "type" : "array",
-              "description" : "languages result",
-              "items" : {
-                "$ref" : "#/definitions/LanguageData"
+    "/languages": {
+      "get": {
+        "tags": [
+          "general"
+        ],
+        "summary": "Get list of languages details for the specified site",
+        "consumes": [
+          "text/plain; charset=utf-8"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "site",
+            "in": "query",
+            "description": "Application context<br />\nExample: 'sl'\n",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON object",
+            "schema": {
+              "type": "array",
+              "description": "languages result",
+              "items": {
+                "$ref": "#/definitions/LanguageData"
               }
             }
           }
         }
       }
     },
-    "/anyvalue" : {
-      "get" : {
-        "tags" : [ "general" ],
-        "summary" : "Get a response that could be any value",
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "200" : {
-            "description" : "Returns any value",
-            "schema" : {
-              "$ref" : "#/definitions/AnyValue"
+    "/anyvalue": {
+      "get": {
+        "tags": [
+          "general"
+        ],
+        "summary": "Get a response that could be any value",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns any value",
+            "schema": {
+              "$ref": "#/definitions/AnyValue"
             }
           }
         }
@@ -117,32 +129,32 @@
     }
   },
   "definitions": {
-    "LanguageData" : {
-      "type" : "array",
-      "description" : "Languages data",
-      "items" : {
-        "$ref" : "#/definitions/LanguageData_inner"
+    "LanguageData": {
+      "type": "array",
+      "description": "Languages data",
+      "items": {
+        "$ref": "#/definitions/LanguageData_inner"
       }
     },
-    "LanguageData_inner" : {
-      "properties" : {
-        "isoCode" : {
-          "$ref" : "#/definitions/Language"
+    "LanguageData_inner": {
+      "properties": {
+        "isoCode": {
+          "$ref": "#/definitions/Language"
         },
-        "label" : {
-          "type" : "string",
-          "description" : "Language label in extracted language"
+        "label": {
+          "type": "string",
+          "description": "Language label in extracted language"
         },
-        "isDefault" : {
-          "type" : "boolean",
-          "description" : "Is the default language for the site"
+        "isDefault": {
+          "type": "boolean",
+          "description": "Is the default language for the site"
         }
       }
     },
-    "Language" : {
-      "type" : "string",
-      "description" : "Language ISO 639-1 (2 characters)",
-      "example" : "fr"
+    "Language": {
+      "type": "string",
+      "description": "Language ISO 639-1 (2 characters)",
+      "example": "fr"
     },
     "AnyValue": {
     }

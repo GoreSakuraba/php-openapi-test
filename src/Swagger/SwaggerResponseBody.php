@@ -13,6 +13,7 @@ class SwaggerResponseBody extends Body
 {
     /**
      * @param string $body
+     *
      * @return bool
      * @throws GenericSwaggerException
      * @throws InvalidRequestException
@@ -20,14 +21,16 @@ class SwaggerResponseBody extends Body
      * @throws DefinitionNotFoundException
      * @throws InvalidDefinitionException
      */
-    public function match($body)
+    public function match($body): bool
     {
         if (!isset($this->structure['schema'])) {
             if (!empty($body)) {
-                throw new NotMatchedException("Expected empty body for " . $this->name);
+                throw new NotMatchedException("Expected empty body for '$this->name'");
             }
+
             return true;
         }
+
         return $this->matchSchema($this->name, $this->structure['schema'], $body);
     }
 }
