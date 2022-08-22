@@ -1,11 +1,11 @@
 <?php
 
-namespace ByJG\ApiTools;
+namespace GoreSakuraba\OpenAPI;
 
-use ByJG\ApiTools\Base\Schema;
-use ByJG\ApiTools\Exception\InvalidRequestException;
-use ByJG\ApiTools\Exception\NotMatchedException;
-use ByJG\ApiTools\Exception\StatusCodeNotMatchedException;
+use GoreSakuraba\OpenAPI\Base\Schema;
+use GoreSakuraba\OpenAPI\Exception\InvalidRequestException;
+use GoreSakuraba\OpenAPI\Exception\NotMatchedException;
+use GoreSakuraba\OpenAPI\Exception\StatusCodeNotMatchedException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\Utils;

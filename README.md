@@ -40,11 +40,11 @@ make a request to your API Method and check if the request parameters, status an
 /**
  * Create a TestCase inherited from SwaggerTestCase
  */
-class MyTestCase extends \ByJG\ApiTools\ApiTestCase
+class MyTestCase extends \GoreSakuraba\OpenAPI\ApiTestCase
 {
     public function setUp()
     {
-        $schema = \ByJG\ApiTools\Base\Schema::getInstance(file_get_contents('/path/to/json/definition'));
+        $schema = \GoreSakuraba\OpenAPI\Base\Schema::getInstance(file_get_contents('/path/to/json/definition'));
         $this->setSchema($schema);
     }
     
@@ -54,7 +54,7 @@ class MyTestCase extends \ByJG\ApiTools\ApiTestCase
      */
     public function testGet()
     {
-        $request = new \ByJG\ApiTools\ApiRequester();
+        $request = new \GoreSakuraba\OpenAPI\ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/path/for/get/1");
@@ -67,7 +67,7 @@ class MyTestCase extends \ByJG\ApiTools\ApiTestCase
      */
     public function testGetNotFound()
     {
-        $request = new \ByJG\ApiTools\ApiRequester();
+        $request = new \GoreSakuraba\OpenAPI\ApiRequester();
         $request
             ->withMethod('GET')
             ->withPath("/path/for/get/NOTFOUND")
@@ -83,7 +83,7 @@ class MyTestCase extends \ByJG\ApiTools\ApiTestCase
      */
     public function testPost()
     {
-        $request = new \ByJG\ApiTools\ApiRequester();
+        $request = new \GoreSakuraba\OpenAPI\ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/path/for/post/2")
@@ -99,7 +99,7 @@ class MyTestCase extends \ByJG\ApiTools\ApiTestCase
      */
     public function testPost2()
     {
-        $request = new \ByJG\ApiTools\ApiRequester();
+        $request = new \GoreSakuraba\OpenAPI\ApiRequester();
         $request
             ->withMethod('POST')
             ->withPath("/path/for/post/3")
@@ -121,7 +121,7 @@ process as the functional tests. In order to do that, you need a bit of
 glue code based on the `AbstractRequester` baseclass:
 
 ```php
-class MyAppRequester extends ByJG\ApiTools\AbstractRequester
+class MyAppRequester extends \GoreSakuraba\OpenAPI\AbstractRequester
 {
     /** @var MyAppKernel */
     private $app;
@@ -152,7 +152,7 @@ receiving you have to:
 
 ```php
 <?php
-$schema = \ByJG\ApiTools\Base\Schema::getInstance($contentsOfSchemaJson);
+$schema = \GoreSakuraba\OpenAPI\Base\Schema::getInstance($contentsOfSchemaJson);
 ```
 
 **2. Get the definitions for your path**
@@ -192,7 +192,7 @@ So, before your API Code you can validate the request body using:
 
 ```php
 <?php
-$schema = \ByJG\ApiTools\Base\Schema::getInstance($contentsOfSchemaJson);
+$schema = \GoreSakuraba\OpenAPI\Base\Schema::getInstance($contentsOfSchemaJson);
 $bodyRequestDef = $schema->getRequestParameters($path, $method);
 $bodyRequestDef->match($requestBody);
 ```
@@ -222,7 +222,7 @@ class MyTest extends ApiTestCase
 
         // The MockRequester does not send the request to a real endpoint
         // Just returning the expected Response object sent in the constructor 
-        $request = new \ByJG\ApiTools\MockRequester($expectedResponse);
+        $request = new \GoreSakuraba\OpenAPI\MockRequester($expectedResponse);
         $request
             ->withMethod('GET')
             ->withPath("/pet/1");
@@ -248,7 +248,7 @@ $psr7Request = new \GuzzleHttp\Psr7\Request(
     \GuzzleHttp\Psr7\Utils::streamFor('{"foo":"bar"}')
 );
 
-$request = new \ByJG\ApiTools\ApiRequester();
+$request = new \GoreSakuraba\OpenAPI\ApiRequester();
 $request->withPsr7Request($psr7Request);
 
 // Return a ResponseInterface PSR7 component 

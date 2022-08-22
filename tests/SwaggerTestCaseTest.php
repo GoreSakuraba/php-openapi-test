@@ -2,7 +2,7 @@
 
 namespace Test;
 
-use ByJG\ApiTools\Base\Schema;
+use GoreSakuraba\OpenAPI\Base\Schema;
 use JsonException;
 
 class SwaggerTestCaseTest extends TestingTestCase
@@ -13,7 +13,7 @@ class SwaggerTestCaseTest extends TestingTestCase
      */
     public function setUp(): void
     {
-        $schema = Schema::getInstance(file_get_contents(__DIR__ . '/rest/swagger.json'));
+        $schema = Schema::getInstance(file_get_contents(__DIR__ . '/Rest/swagger.json'));
         $this->setSchema($schema);
     }
 }

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Start Swagger Host" type="PhpBuiltInWebServerConfigurationType" factoryName="PHP Built-in Web Server" document_root="$PROJECT_DIR$" host="127.0.0.1" port="8080" router_script="$PROJECT_DIR$/tests/rest/index.php" use_router_script="true">
+  <configuration default="false" name="Start Swagger Host" type="PhpBuiltInWebServerConfigurationType" factoryName="PHP Built-in Web Server" document_root="$PROJECT_DIR$" host="127.0.0.1" port="8080" router_script="$PROJECT_DIR$/tests/Rest/index.php" use_router_script="true">
     <CommandLine>
       <envs>
         <env name="SPEC" value="swagger" />

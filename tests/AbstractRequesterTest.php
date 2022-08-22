@@ -2,16 +2,16 @@
 
 namespace Test;
 
-use ByJG\ApiTools\ApiTestCase;
-use ByJG\ApiTools\Exception\DefinitionNotFoundException;
-use ByJG\ApiTools\Exception\GenericSwaggerException;
-use ByJG\ApiTools\Exception\HttpMethodNotFoundException;
-use ByJG\ApiTools\Exception\InvalidDefinitionException;
-use ByJG\ApiTools\Exception\InvalidRequestException;
-use ByJG\ApiTools\Exception\NotMatchedException;
-use ByJG\ApiTools\Exception\PathNotFoundException;
-use ByJG\ApiTools\Exception\StatusCodeNotMatchedException;
-use ByJG\ApiTools\MockRequester;
+use GoreSakuraba\OpenAPI\ApiTestCase;
+use GoreSakuraba\OpenAPI\Exception\DefinitionNotFoundException;
+use GoreSakuraba\OpenAPI\Exception\GenericSwaggerException;
+use GoreSakuraba\OpenAPI\Exception\HttpMethodNotFoundException;
+use GoreSakuraba\OpenAPI\Exception\InvalidDefinitionException;
+use GoreSakuraba\OpenAPI\Exception\InvalidRequestException;
+use GoreSakuraba\OpenAPI\Exception\NotMatchedException;
+use GoreSakuraba\OpenAPI\Exception\PathNotFoundException;
+use GoreSakuraba\OpenAPI\Exception\StatusCodeNotMatchedException;
+use GoreSakuraba\OpenAPI\MockRequester;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;

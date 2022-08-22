@@ -1,6 +1,6 @@
 <?php
 
-namespace ByJG\ApiTools;
+namespace GoreSakuraba\OpenAPI;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;

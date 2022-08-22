@@ -1,16 +1,16 @@
 <?php
 
-namespace ByJG\ApiTools\Base;
+namespace GoreSakuraba\OpenAPI\Base;
 
-use ByJG\ApiTools\Exception\DefinitionNotFoundException;
-use ByJG\ApiTools\Exception\GenericSwaggerException;
-use ByJG\ApiTools\Exception\InvalidDefinitionException;
-use ByJG\ApiTools\Exception\InvalidRequestException;
-use ByJG\ApiTools\Exception\NotMatchedException;
-use ByJG\ApiTools\OpenApi\OpenApiResponseBody;
-use ByJG\ApiTools\OpenApi\OpenApiSchema;
-use ByJG\ApiTools\Swagger\SwaggerResponseBody;
-use ByJG\ApiTools\Swagger\SwaggerSchema;
+use GoreSakuraba\OpenAPI\Exception\DefinitionNotFoundException;
+use GoreSakuraba\OpenAPI\Exception\GenericSwaggerException;
+use GoreSakuraba\OpenAPI\Exception\InvalidDefinitionException;
+use GoreSakuraba\OpenAPI\Exception\InvalidRequestException;
+use GoreSakuraba\OpenAPI\Exception\NotMatchedException;
+use GoreSakuraba\OpenAPI\OpenApi\OpenApiResponseBody;
+use GoreSakuraba\OpenAPI\OpenApi\OpenApiSchema;
+use GoreSakuraba\OpenAPI\Swagger\SwaggerResponseBody;
+use GoreSakuraba\OpenAPI\Swagger\SwaggerSchema;
 
 abstract class Body
 {

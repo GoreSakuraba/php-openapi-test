@@ -1,6 +1,6 @@
 <?php
 
-namespace ByJG\ApiTools\Exception;
+namespace GoreSakuraba\OpenAPI\Exception;
 
 class StatusCodeNotMatchedException extends BaseException
 {

@@ -2,8 +2,8 @@
 
 namespace Test;
 
-use ByJG\ApiTools\Base\Schema;
-use ByJG\ApiTools\Swagger\SwaggerSchema;
+use GoreSakuraba\OpenAPI\Base\Schema;
+use GoreSakuraba\OpenAPI\Swagger\SwaggerSchema;
 use JsonException;
 use PHPUnit\Framework\TestCase;
 

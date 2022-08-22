@@ -2,7 +2,7 @@
 
 namespace Test;
 
-use ByJG\ApiTools\Exception\GenericSwaggerException;
+use GoreSakuraba\OpenAPI\Exception\GenericSwaggerException;
 use JsonException;
 use PHPUnit\Framework\TestCase;
 

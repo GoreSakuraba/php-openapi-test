@@ -2,8 +2,8 @@
 
 namespace Test;
 
-use ByJG\ApiTools\Base\Schema;
-use ByJG\ApiTools\OpenApi\OpenApiSchema;
+use GoreSakuraba\OpenAPI\Base\Schema;
+use GoreSakuraba\OpenAPI\OpenApi\OpenApiSchema;
 use JsonException;
 use PHPUnit\Framework\TestCase;
 
