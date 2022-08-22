@@ -1,9 +1,19 @@
 {
-  "name": "byjg/swagger-test",
+  "name": "goresakuraba/php-openapi-test",
   "description": "A set of tools for testing your REST calls based on the Swagger or OpenAPI documentation using PHPUnit",
-  "minimum-stability": "dev",
-  "prefer-stable": true,
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Marius 'GoreSakuraba' Schiller",
+      "email": "marius.schiller16@gmail.com",
+      "role": "Developer"
+    },
+    {
+      "name": "Contributors",
+      "homepage": "https://github.com/GoreSakuraba/php-openapi-test/graphs/contributors",
+      "role": "Developer"
+    }
+  ],
   "require": {
     "php": "^7.4 || ^8.0",
     "ext-json": "*",
