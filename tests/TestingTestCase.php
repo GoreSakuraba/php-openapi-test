@@ -183,7 +183,14 @@ abstract class TestingTestCase extends ApiTestCase
             ],
         ]);
 
-        $psr7Requester = new Request('post', '/inventory', ['Content-Type' => 'multipart/form-data; boundary=' . $multipartStream->getBoundary()], $multipartStream);
+        $psr7Requester = new Request(
+            'post',
+            '/inventory',
+            [
+                'Content-Type' => 'multipart/form-data; boundary=' . $multipartStream->getBoundary()
+            ],
+            $multipartStream
+        );
 
         $request = new ApiRequester();
         $request

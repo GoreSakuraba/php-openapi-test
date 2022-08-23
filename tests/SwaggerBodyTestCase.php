@@ -42,7 +42,7 @@ class SwaggerBodyTestCase extends TestCase
     {
         /** @var SwaggerSchema $schema */
         $schema = Schema::getInstance(
-            self::getSwaggerJsonContent_No2(),
+            self::getSwaggerJsonContentNo2(),
             $allowNullValues
         );
 
@@ -60,7 +60,7 @@ class SwaggerBodyTestCase extends TestCase
     /**
      * @return string
      */
-    protected static function getSwaggerJsonContent_No2(): string
+    protected static function getSwaggerJsonContentNo2(): string
     {
         return file_get_contents(__DIR__ . '/example/swagger2.json');
     }

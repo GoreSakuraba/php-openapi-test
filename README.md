@@ -36,7 +36,6 @@ Swagger Test provides the class `SwaggerTestCase` for you extend and create a PH
 make a request to your API Method and check if the request parameters, status and object returned are OK.
 
 ```php
-<?php
 /**
  * Create a TestCase inherited from SwaggerTestCase
  */
@@ -55,9 +54,8 @@ class MyTestCase extends \GoreSakuraba\OpenAPI\ApiTestCase
     public function testGet()
     {
         $request = new \GoreSakuraba\OpenAPI\ApiRequester();
-        $request
-            ->withMethod('GET')
-            ->withPath("/path/for/get/1");
+        $request->withMethod('GET')
+                ->withPath("/path/for/get/1");
 
         $this->assertRequest($request);
     }
@@ -68,10 +66,9 @@ class MyTestCase extends \GoreSakuraba\OpenAPI\ApiTestCase
     public function testGetNotFound()
     {
         $request = new \GoreSakuraba\OpenAPI\ApiRequester();
-        $request
-            ->withMethod('GET')
-            ->withPath("/path/for/get/NOTFOUND")
-            ->assertResponseCode(404);
+        $request->withMethod('GET')
+                ->withPath("/path/for/get/NOTFOUND")
+                ->assertResponseCode(404);
 
         $this->assertRequest($request);
     }
@@ -84,10 +81,9 @@ class MyTestCase extends \GoreSakuraba\OpenAPI\ApiTestCase
     public function testPost()
     {
         $request = new \GoreSakuraba\OpenAPI\ApiRequester();
-        $request
-            ->withMethod('POST')
-            ->withPath("/path/for/post/2")
-            ->withRequestBody(['name'=>'new name', 'field' => 'value']);
+        $request->withMethod('POST')
+                ->withPath("/path/for/post/2")
+                ->withRequestBody(['name' => 'new name', 'field' => 'value']);
 
         $this->assertRequest($request);
     }
@@ -100,11 +96,10 @@ class MyTestCase extends \GoreSakuraba\OpenAPI\ApiTestCase
     public function testPost2()
     {
         $request = new \GoreSakuraba\OpenAPI\ApiRequester();
-        $request
-            ->withMethod('POST')
-            ->withPath("/path/for/post/3")
-            ->withQuery(['id'=>10])
-            ->withRequestBody(['name'=>'new name', 'field' => 'value']);
+        $request->withMethod('POST')
+                ->withPath("/path/for/post/3")
+                ->withQuery(['id' => 10])
+                ->withRequestBody(['name' => 'new name', 'field' => 'value']);
 
         $this->assertRequest($request);
     }
@@ -123,8 +118,7 @@ glue code based on the `AbstractRequester` baseclass:
 ```php
 class MyAppRequester extends \GoreSakuraba\OpenAPI\AbstractRequester
 {
-    /** @var MyAppKernel */
-    private $app;
+    private MyAppKernel $app;
 
     public function __construct(MyAppKernel $app)
     {
@@ -151,14 +145,12 @@ receiving you have to:
 **1. Create the Swagger or OpenAPI Test Schema**
 
 ```php
-<?php
 $schema = \GoreSakuraba\OpenAPI\Base\Schema::getInstance($contentsOfSchemaJson);
 ```
 
 **2. Get the definitions for your path**
 
 ```php
-<?php
 $path = '/path/to/method';
 $statusExpected = 200;
 $method = 'POST';
@@ -173,7 +165,6 @@ $bodyResponseDef = $schema->getResponseParameters($path, $method, $statusExpecte
 **3. Match the result**
 
 ```php
-<?php
 if (!empty($requestBody)) {
     $bodyRequestDef->match($requestBody);
 }
@@ -191,7 +182,6 @@ parameters is the expected.
 So, before your API Code you can validate the request body using:
 
 ```php
-<?php
 $schema = \GoreSakuraba\OpenAPI\Base\Schema::getInstance($contentsOfSchemaJson);
 $bodyRequestDef = $schema->getRequestParameters($path, $method);
 $bodyRequestDef->match($requestBody);
@@ -205,7 +195,6 @@ difference is the `MockRequester` don't need to request to a real endpoint.
 This is used to validate request and response against your OpenAPI spec without running any server code. 
 
 ```php
-<?php
 class MyTest extends ApiTestCase
 {
     public function testExpectOK()
@@ -223,9 +212,8 @@ class MyTest extends ApiTestCase
         // The MockRequester does not send the request to a real endpoint
         // Just returning the expected Response object sent in the constructor 
         $request = new \GoreSakuraba\OpenAPI\MockRequester($expectedResponse);
-        $request
-            ->withMethod('GET')
-            ->withPath("/pet/1");
+        $request->withMethod('GET')
+                ->withPath("/pet/1");
 
         $this->assertRequest($request); // That should be "True" based on the specification
     }
@@ -239,8 +227,6 @@ You can populate the `ApiRequester`/`MockRequester` with the information provide
 e.g.
 
 ```php
-<?php
-
 $psr7Request = new \GuzzleHttp\Psr7\Request(
     'get',
     '/method_to_be_tested?param1=value1',

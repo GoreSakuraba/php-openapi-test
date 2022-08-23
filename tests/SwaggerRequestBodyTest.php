@@ -228,7 +228,7 @@ class SwaggerRequestBodyTest extends SwaggerBodyTestCase
      * @throws PathNotFoundException
      * @throws RequiredArgumentNotFound
      */
-    public function testMatchRequestBodyRequired_Issue21(): void
+    public function testMatchRequestBodyRequiredIssue21(): void
     {
         // Full Request
         $body = [
@@ -253,7 +253,7 @@ class SwaggerRequestBodyTest extends SwaggerBodyTestCase
      * @throws PathNotFoundException
      * @throws RequiredArgumentNotFound
      */
-    public function testMatchRequestBodyRequired_Issue21_Required(): void
+    public function testMatchRequestBodyRequiredIssue21Required(): void
     {
         $this->expectException(NotMatchedException::class);
         $this->expectExceptionMessage('Required property \'user_uuid\'');

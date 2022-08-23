@@ -42,7 +42,7 @@ class OpenApiBodyTestCase extends TestCase
     {
         /** @var OpenApiSchema $schema */
         $schema = Schema::getInstance(
-            self::getOpenApiJsonContent_No2(),
+            self::getOpenApiJsonContentNo2(),
             $allowNullValues
         );
 
@@ -59,7 +59,7 @@ class OpenApiBodyTestCase extends TestCase
     {
         /** @var OpenApiSchema $schema */
         $schema = Schema::getInstance(
-            self::getOpenApiJsonContent_No3(),
+            self::getOpenApiJsonContentNo3(),
             $allowNullValues
         );
 
@@ -76,7 +76,7 @@ class OpenApiBodyTestCase extends TestCase
     {
         /** @var OpenApiSchema $schema */
         $schema = Schema::getInstance(
-            self::getOpenApiJsonContent_No5(),
+            self::getOpenApiJsonContentNo5(),
             $allowNullValues
         );
 
@@ -94,7 +94,7 @@ class OpenApiBodyTestCase extends TestCase
     /**
      * @return string
      */
-    protected static function getOpenApiJsonContent_No2(): string
+    protected static function getOpenApiJsonContentNo2(): string
     {
         return file_get_contents(__DIR__ . '/example/openapi2.json');
     }
@@ -102,7 +102,7 @@ class OpenApiBodyTestCase extends TestCase
     /**
      * @return string
      */
-    protected static function getOpenApiJsonContent_No3(): string
+    protected static function getOpenApiJsonContentNo3(): string
     {
         return file_get_contents(__DIR__ . '/example/openapi3.json');
     }
@@ -110,7 +110,7 @@ class OpenApiBodyTestCase extends TestCase
     /**
      * @return string
      */
-    protected static function getOpenApiJsonContent_No5(): string
+    protected static function getOpenApiJsonContentNo5(): string
     {
         return file_get_contents(__DIR__ . '/example/openapi5.json');
     }

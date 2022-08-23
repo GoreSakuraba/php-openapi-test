@@ -5,8 +5,6 @@ namespace Test;
 use GoreSakuraba\OpenAPI\Base\Schema;
 use JsonException;
 
-require_once 'AbstractRequesterTest.php';
-
 class SwaggerTest extends AbstractRequesterTest
 {
     /**

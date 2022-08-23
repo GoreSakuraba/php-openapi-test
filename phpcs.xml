@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<ruleset name="PSR12_CustomLineLength">
+    <file>.</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
+    <rule ref="PSR12" /> <!-- ruleset standard -->
+    <rule ref="Generic.Files.LineLength"> <!-- rule to override -->
+        <properties>
+            <property name="lineLimit" value="160" /> <!-- maximum line length -->
+        </properties>
+    </rule>
+    <arg name="encoding" value="utf-8" />
+</ruleset>
